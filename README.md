@@ -1,2 +1,3 @@
-# reflexa-camera-app
-Qt/QML, C++ &amp; OpenCV Camera App
+## Reflexa Camera Application
+
+A desktop smart camera app built with OpenCV that blends real-time vision, creative filters, and intelligent interaction.
