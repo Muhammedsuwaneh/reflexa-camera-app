@@ -3,7 +3,7 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 Window {
-    width: 1100
+    width: 1280
     height: 900
     visible: true
     flags: Qt.FramelessWindowHint | Qt.Window
@@ -58,7 +58,7 @@ Window {
             Layout.row: 1
             Layout.column: 0
             Layout.fillHeight: true
-            Layout.preferredWidth: 300
+            Layout.preferredWidth: 350
             z: 10
             opacity: cameraControls.showSettings
         }
@@ -68,7 +68,7 @@ Window {
             Layout.row: 1
             Layout.column: 2
             Layout.fillHeight: true
-            Layout.preferredWidth: 300
+            Layout.preferredWidth: 350
             z: 10
             opacity: cameraControls.showFilters
         }

@@ -7,8 +7,9 @@ set(OpenCV_DIR "C:/opencv/build/x64/vc16/lib")
 
 find_package(Qt6 REQUIRED COMPONENTS Quick)
 find_package(Qt6 REQUIRED COMPONENTS Core)
-find_package(Qt6 REQUIRED COMPONENTS Core)
-find_package(Qt6 REQUIRED COMPONENTS Core)
+find_package(Qt6 REQUIRED COMPONENTS Qml)
+find_package(Qt6 REQUIRED COMPONENTS Multimedia)
+find_package(Qt6 REQUIRED COMPONENTS Widgets)
 
 find_package(OpenCV REQUIRED)
 include_directories(${OpenCV_INCLUDE_DIRS})
@@ -40,6 +41,7 @@ qt_add_qml_module(appreflexaCameraApp
         assets/timer.png
         assets/settings.png
         assets/qr.png
+        assets/dropdown.png
         QML_FILES ui/TitleBar.qml
         QML_FILES ui/ControlButton.qml
         QML_FILES ui/ControlsView.qml
@@ -48,6 +50,7 @@ qt_add_qml_module(appreflexaCameraApp
         QML_FILES ui/CameraControlButton.qml
         QML_FILES ui/CameraBehaviorButton.qml
         SOURCES utilities/CameraControls.h utilities/CameraControls.cpp
+        QML_FILES ui/CustomComboBox.qml
 
 )
 
@@ -66,9 +69,11 @@ target_link_libraries(appreflexaCameraApp
     PRIVATE Qt6::Quick
     ${OpenCV_LIBS}
 )
+
+target_link_libraries(appreflexaCameraApp PRIVATE Qt6::Multimedia)
 target_link_libraries(appreflexaCameraApp PRIVATE Qt6::Core)
-target_link_libraries(appreflexaCameraApp PRIVATE Qt6::Core)
-target_link_libraries(appreflexaCameraApp PRIVATE Qt6::Core)
+target_link_libraries(appreflexaCameraApp PRIVATE Qt6::Widgets)
+target_link_libraries(appreflexaCameraApp PRIVATE Qt6::Qml)
 
 include(GNUInstallDirs)
 install(TARGETS appreflexaCameraApp

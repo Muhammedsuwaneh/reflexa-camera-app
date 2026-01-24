@@ -4,42 +4,44 @@ CameraControls::CameraControls(CameraService* camera, QObject *parent)
     : QObject{parent}, m_camera(camera)
 {}
 
-bool CameraControls::hdrIsActive() const { return m_hdrIsActive; }
-bool CameraControls::faceDetectorIsActive() const { return m_faceDetectorIsActive; }
-bool CameraControls::timerIsActive() const { return m_timerIsActive; }
-bool CameraControls::gridIsActive() const { return m_gridIsActive; }
+bool CameraControls::hdrIsActive() const { return this->m_hdrIsActive; }
+bool CameraControls::faceDetectorIsActive() const { return this->m_faceDetectorIsActive; }
+bool CameraControls::timerIsActive() const { return this->m_timerIsActive; }
+bool CameraControls::gridIsActive() const { return this->m_gridIsActive; }
 
-bool CameraControls::cameraButtonIsActive() const { return m_cameraButtonIsActive; }
-bool CameraControls::videoButtonIsActive() const { return m_videoButtonIsActive; }
-bool CameraControls::qrButtonIsActive() const { return m_qrButtonIsActive; }
+bool CameraControls::cameraButtonIsActive() const { return this->m_cameraButtonIsActive; }
+bool CameraControls::videoButtonIsActive() const { return this->m_videoButtonIsActive; }
+bool CameraControls::qrButtonIsActive() const { return this->m_qrButtonIsActive; }
 
 void CameraControls::toggleHDR()
 {
-    m_hdrIsActive = !m_hdrIsActive;
+    this->m_hdrIsActive = !this->m_hdrIsActive;
 
     // call camera service
-    //camera->setHdr(m_hdrIsActive);
+    //this->m_camera->setHdr(this->m_hdrIsActive);
 
     emit hdrIsActiveChanged();
 }
 
 void CameraControls::toggleFaceDetector()
 {
-    m_faceDetectorIsActive = !m_faceDetectorIsActive;
+    this->m_faceDetectorIsActive = !this->m_faceDetectorIsActive;
+    //this->m_camera->setDetectingFace(this->m_faceDetectorIsActive);
+
     emit faceDetectorIsActiveChanged();
 
-    // camera->setDetectingFace(m_faceDetectorIsActive);
+    this->m_camera->setDetectingFace(this->m_faceDetectorIsActive);
 }
 
 void CameraControls::toggleTimer()
 {
-    m_timerIsActive = !m_timerIsActive;
+    this->m_timerIsActive = !this->m_timerIsActive;
     emit timerIsActiveChanged();
 }
 
 void CameraControls::toggleGrid()
 {
-    m_gridIsActive = !m_gridIsActive;
+    this->m_gridIsActive = !this->m_gridIsActive;
     emit gridIsActiveChanged();
 }
 
@@ -57,9 +59,13 @@ void CameraControls::toggleFilter()
 
 void CameraControls::activateCamera()
 {
-    m_cameraButtonIsActive = true;
-    m_videoButtonIsActive = false;
-    m_qrButtonIsActive = false;
+    if(this->m_cameraButtonIsActive) return;
+
+    this->m_cameraButtonIsActive = true;
+    this->m_videoButtonIsActive = false;
+    this->m_qrButtonIsActive = false;
+
+    this->m_camera->setMode(CameraService::Photo);
 
     emit cameraButtonIsActiveChanged();
     emit videoButtonIsActiveChanged();
@@ -68,9 +74,13 @@ void CameraControls::activateCamera()
 
 void CameraControls::activateVideo()
 {
-    m_cameraButtonIsActive = false;
-    m_videoButtonIsActive = true;
-    m_qrButtonIsActive = false;
+    if(this->m_videoButtonIsActive) return;
+
+    this->m_cameraButtonIsActive = false;
+    this->m_videoButtonIsActive = true;
+    this->m_qrButtonIsActive = false;
+
+    this->m_camera->setMode(CameraService::Video);
 
     emit cameraButtonIsActiveChanged();
     emit videoButtonIsActiveChanged();
@@ -79,9 +89,13 @@ void CameraControls::activateVideo()
 
 void CameraControls::activateQR()
 {
-    m_cameraButtonIsActive = false;
-    m_videoButtonIsActive = false;
-    m_qrButtonIsActive = true;
+    if(this->m_qrButtonIsActive) return;
+
+    this->m_cameraButtonIsActive = false;
+    this->m_videoButtonIsActive = false;
+    this->m_qrButtonIsActive = true;
+
+    this->m_camera->setMode(CameraService::QRCode);
 
     emit cameraButtonIsActiveChanged();
     emit videoButtonIsActiveChanged();
@@ -90,10 +104,12 @@ void CameraControls::activateQR()
 
 void CameraControls::onCameraPressed()
 {
-    if (m_cameraButtonIsActive) {
-        // Take photo
-        //this->m_camera->takeShot();
-    } else {
+    if (m_cameraButtonIsActive)
+    {
+        this->m_camera->takeShot();
+    }
+    else
+    {
         activateCamera();
     }
 }
@@ -101,8 +117,7 @@ void CameraControls::onCameraPressed()
 void CameraControls::onVideoPressed()
 {
     if (m_videoButtonIsActive) {
-        // Start / stop recording
-        //this->m_camera->record();
+        this->m_camera->record();
     } else {
         activateVideo();
     }
@@ -110,9 +125,9 @@ void CameraControls::onVideoPressed()
 
 void CameraControls::onQRPressed()
 {
-    if (m_qrButtonIsActive) {
-        // Scan QR
-        //this->m_camera->scanQR();
+    if (m_qrButtonIsActive)
+    {
+        this->m_camera->scanQR();
     } else {
         activateQR();
     }
@@ -120,10 +135,10 @@ void CameraControls::onQRPressed()
 
 bool CameraControls::showSettings() const
 {
-    return m_showSettings;
+    return this->m_showSettings;
 }
 
 bool CameraControls::showFilters() const
 {
-    return m_showFilters;
+    return this->m_showFilters;
 }
