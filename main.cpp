@@ -35,8 +35,7 @@ int main(int argc, char *argv[])
 
     // context
     engine.rootContext()->setContextProperty("WindowController", &windowController);
-    qmlRegisterType<CameraService>("Camera", 1, 0, "CameraService");
-    //engine.rootContext()->setContextProperty("camera", &camera);
+    engine.rootContext()->setContextProperty("Camera", &camera);
 
 
     QObject::connect(

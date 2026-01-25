@@ -56,16 +56,15 @@ void CameraService::setDetectingFace(bool detecting)
 
 void CameraService::startCamera()
 {
-    //getCaptureData();
-
-    if (!cap.open(this->m_currentCameraIndex))
+    if (!cap.open(0))
     {
-        //QMessageBox::critical(nullptr, tr("Camera Error"), tr("Failed to open camera device."), QMessageBox::Ok);
-        qDebug() << "Failed to open camera device.";
+        QMessageBox::critical(nullptr, tr("Camera Error"), tr("Failed to open camera device."), QMessageBox::Ok);
         return;
     }
 
     setDetectingFace(false);
+
+    getCaptureData();
 
     setCurrentQualityIndex(m_currentQualityIndex);
     this->running = true;
@@ -113,16 +112,14 @@ void CameraService::getCaptureData()
         }
         else
         {
-            /*QMessageBox::information(nullptr, tr("Device Error"),
+            QMessageBox::information(nullptr, tr("Device Error"),
                                      tr("No camera devices connected.\nPlease connect a camera device."),
-                                     QMessageBox::Ok);*/
-            qDebug() << "No camera devices connected.\nPlease connect a camera device.";
+                                     QMessageBox::Ok);
         }
     }
     catch (const std::exception &e)
     {
-        qDebug() << QString::fromStdString(e.what());
-        //QMessageBox::critical(nullptr, tr("Camera Error"), QString::fromStdString(e.what()), QMessageBox::Ok);
+        QMessageBox::critical(nullptr, tr("Camera Error"), QString::fromStdString(e.what()), QMessageBox::Ok);
     }
 }
 
@@ -130,8 +127,6 @@ void CameraService::applyPhotoQuality(int qualityIndex)
 {
     try
     {
-        return;
-
         const auto devices = QMediaDevices::videoInputs();
         if (devices.isEmpty()) return;
         if (m_currentCameraIndex < 0 || m_currentCameraIndex >= devices.size()) return;
@@ -166,8 +161,7 @@ void CameraService::applyPhotoQuality(int qualityIndex)
     }
     catch (const std::exception &e)
     {
-        qDebug() << QString::fromStdString(e.what());
-        //QMessageBox::critical(nullptr, tr("Camera Error"), QString::fromStdString(e.what()), QMessageBox::Ok);
+        QMessageBox::critical(nullptr, tr("Camera Error"), QString::fromStdString(e.what()), QMessageBox::Ok);
     }
 }
 
@@ -175,8 +169,6 @@ void CameraService::applyVideoQuality(int formatIndex)
 {
     try
     {
-        return;
-
         const auto devices = QMediaDevices::videoInputs();
         if (devices.isEmpty()) return;
         if (m_currentCameraIndex < 0 || m_currentCameraIndex >= devices.size()) return;
@@ -209,8 +201,7 @@ void CameraService::applyVideoQuality(int formatIndex)
     }
     catch (const std::exception &e)
     {
-        qDebug() << QString::fromStdString(e.what());
-        //QMessageBox::critical(nullptr, tr("Camera Error"), QString::fromStdString(e.what()), QMessageBox::Ok);
+        QMessageBox::critical(nullptr, tr("Camera Error"), QString::fromStdString(e.what()), QMessageBox::Ok);
     }
 }
 
@@ -236,7 +227,7 @@ void CameraService::stopCamera()
 void CameraService::processFrame()
 {
     // Initialize COM for this thread
-    //CoInitializeEx(nullptr, COINIT_MULTITHREADED);
+    CoInitializeEx(nullptr, COINIT_MULTITHREADED);
 
     try
     {
@@ -265,8 +256,7 @@ void CameraService::processFrame()
     }
     catch (const std::exception &e)
     {
-        qDebug() << QString::fromStdString(e.what());
-        //QMessageBox::critical(nullptr, tr("Camera Error"), QString::fromStdString(e.what()), QMessageBox::Ok);
+        QMessageBox::critical(nullptr, tr("Camera Error"), QString::fromStdString(e.what()), QMessageBox::Ok);
     }
 
     CoUninitialize(); // Clean up COM
