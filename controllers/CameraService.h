@@ -4,20 +4,13 @@
 #include <QObject>
 #include <QImage>
 #include <opencv2/opencv.hpp>
+#include "utilities/CameraWorker.h"
 
 class CameraService : public QObject
 {
     Q_OBJECT
     Q_PROPERTY(QImage frame READ frame NOTIFY frameChanged)
-
-    enum Mode {
-        Photo = 0,
-        Video = 1,
-        QRCode = 2
-    };
-
-    Q_ENUM(Mode)
-    Q_PROPERTY(Mode mode READ mode WRITE setMode NOTIFY modeChanged)
+    Q_PROPERTY(cv::Mat originalFrame READ originalFrame WRITE setOriginalFrame NOTIFY originalFrameChanged)
 
     // CAM DEVICES
     Q_PROPERTY(QStringList cameraNames READ cameraNames NOTIFY camerasChanged)
@@ -30,7 +23,16 @@ class CameraService : public QObject
     // VIDEO QUALITY
     Q_PROPERTY(QStringList videoQualities READ videoQualities NOTIFY videoQualitiesChanged)
     Q_PROPERTY(int currentVideoQualityIndex READ currentVideoQualityIndex WRITE setCurrentVideoQualityIndex NOTIFY currentVideoQualityIndexChanged)
+
 public:
+    enum Mode {
+        Photo = 0,
+        Video = 1,
+        QRCode = 2
+    };
+    Q_ENUM(Mode)
+    Q_PROPERTY(Mode mode READ mode WRITE setMode NOTIFY modeChanged)
+
     explicit CameraService(QObject *parent = nullptr);
 
     QImage frame() const;
@@ -50,7 +52,6 @@ public:
     void setCurrentCameraIndex(int newCurrentCameraIndex);
 
     QStringList camQualities() const;
-    Q_INVOKABLE void switchMode(int mode);
 
     int currentQualityIndex() const;
     void setCurrentQualityIndex(int newCurrentQualityIndex);
@@ -62,6 +63,9 @@ public:
 
     Mode mode() const;
     void setMode(const Mode &newMode);
+
+    cv::Mat originalFrame() const;
+    void setOriginalFrame(const cv::Mat &newOriginalFrame);
 
 signals:
     void frameChanged();
@@ -77,6 +81,8 @@ signals:
 
     void modeChanged();
 
+    void originalFrameChanged();
+
 private:
     QImage m_frame;
     cv::VideoCapture cap;
@@ -87,7 +93,7 @@ private:
 
     QTimer* timer;
 
-    void setCameraDefaults();
+    void getCaptureData();
     void startCamera();
     void stopCamera();
     void processFrame();
@@ -98,7 +104,10 @@ private:
     int m_currentQualityIndex = 0;
     QStringList m_videoQualities;
     int m_currentVideoQualityIndex = 0;
-    Mode m_mode;
+    Mode m_mode = Photo;
+    cv::Mat m_originalFrame;
+
+    CameraWorker* worker;
 };
 
 #endif // CAMERASERVICE_H

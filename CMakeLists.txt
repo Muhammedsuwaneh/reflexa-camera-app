@@ -10,6 +10,7 @@ find_package(Qt6 REQUIRED COMPONENTS Core)
 find_package(Qt6 REQUIRED COMPONENTS Qml)
 find_package(Qt6 REQUIRED COMPONENTS Multimedia)
 find_package(Qt6 REQUIRED COMPONENTS Widgets)
+find_package(Qt6 REQUIRED COMPONENTS Core)
 
 find_package(OpenCV REQUIRED)
 include_directories(${OpenCV_INCLUDE_DIRS})
@@ -51,6 +52,8 @@ qt_add_qml_module(appreflexaCameraApp
         QML_FILES ui/CameraBehaviorButton.qml
         SOURCES utilities/CameraControls.h utilities/CameraControls.cpp
         QML_FILES ui/CustomComboBox.qml
+        SOURCES controllers/ImageTextureController.h controllers/ImageTextureController.cpp
+        SOURCES utilities/CameraWorker.h utilities/CameraWorker.cpp
 
 )
 
@@ -74,6 +77,7 @@ target_link_libraries(appreflexaCameraApp PRIVATE Qt6::Multimedia)
 target_link_libraries(appreflexaCameraApp PRIVATE Qt6::Core)
 target_link_libraries(appreflexaCameraApp PRIVATE Qt6::Widgets)
 target_link_libraries(appreflexaCameraApp PRIVATE Qt6::Qml)
+target_link_libraries(appreflexaCameraApp PRIVATE Qt6::Core)
 
 include(GNUInstallDirs)
 install(TARGETS appreflexaCameraApp

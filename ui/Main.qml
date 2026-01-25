@@ -60,7 +60,9 @@ Window {
             Layout.fillHeight: true
             Layout.preferredWidth: 350
             z: 10
-            opacity: cameraControls.showSettings
+            opacity: 0 || cameraControls.showSettings
+
+            Behavior on opacity { NumberAnimation { duration: 180; easing.type: Easing.OutCubic } }
         }
 
 
@@ -70,7 +72,9 @@ Window {
             Layout.fillHeight: true
             Layout.preferredWidth: 350
             z: 10
-            opacity: cameraControls.showFilters
+            opacity: 0 || cameraControls.showFilters
+
+            Behavior on opacity { NumberAnimation { duration: 180; easing.type: Easing.OutCubic } }
         }
 
         ControlsView {

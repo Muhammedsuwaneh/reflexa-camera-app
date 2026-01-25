@@ -104,41 +104,22 @@ void CameraControls::activateQR()
 
 void CameraControls::onCameraPressed()
 {
-    if (m_cameraButtonIsActive)
-    {
-        this->m_camera->takeShot();
-    }
-    else
-    {
-        activateCamera();
-    }
+    if (m_cameraButtonIsActive) this->m_camera->takeShot();
+    else activateCamera();
 }
 
 void CameraControls::onVideoPressed()
 {
-    if (m_videoButtonIsActive) {
-        this->m_camera->record();
-    } else {
-        activateVideo();
-    }
+    if (m_videoButtonIsActive) this->m_camera->record();
+    else activateVideo();
 }
 
 void CameraControls::onQRPressed()
 {
-    if (m_qrButtonIsActive)
-    {
-        this->m_camera->scanQR();
-    } else {
-        activateQR();
-    }
+    if(this->m_qrButtonIsActive) this->m_camera->scanQR();
+    else activateQR();
 }
 
-bool CameraControls::showSettings() const
-{
-    return this->m_showSettings;
-}
+bool CameraControls::showSettings() const { return this->m_showSettings; }
 
-bool CameraControls::showFilters() const
-{
-    return this->m_showFilters;
-}
+bool CameraControls::showFilters() const { return this->m_showFilters; }
