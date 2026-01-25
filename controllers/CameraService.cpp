@@ -58,7 +58,7 @@ void CameraService::startCamera()
 {
     if (!cap.open(0))
     {
-        QMessageBox::critical(nullptr, tr("Camera Error"), tr("Failed to open camera device."), QMessageBox::Ok);
+        QMessageBox::information(nullptr, tr("Camera Error"), tr("Failed to open camera device."), QMessageBox::Ok);
         return;
     }
 
@@ -119,7 +119,7 @@ void CameraService::getCaptureData()
     }
     catch (const std::exception &e)
     {
-        QMessageBox::critical(nullptr, tr("Camera Error"), QString::fromStdString(e.what()), QMessageBox::Ok);
+        QMessageBox::information(nullptr, tr("Camera Error"), QString::fromStdString(e.what()), QMessageBox::Ok);
     }
 }
 
@@ -150,7 +150,7 @@ void CameraService::applyPhotoQuality(int qualityIndex)
 
         if (!cap.open(m_currentCameraIndex))
         {
-            QMessageBox::critical(nullptr, tr("Camera Error"), tr("Failed to open camera device."), QMessageBox::Ok);
+            QMessageBox::information(nullptr, tr("Camera Error"), tr("Failed to open camera device."), QMessageBox::Ok);
             return;
         }
 
@@ -161,7 +161,7 @@ void CameraService::applyPhotoQuality(int qualityIndex)
     }
     catch (const std::exception &e)
     {
-        QMessageBox::critical(nullptr, tr("Camera Error"), QString::fromStdString(e.what()), QMessageBox::Ok);
+        QMessageBox::information(nullptr, tr("Camera Error"), QString::fromStdString(e.what()), QMessageBox::Ok);
     }
 }
 
@@ -191,7 +191,7 @@ void CameraService::applyVideoQuality(int formatIndex)
 
         if (!cap.open(m_currentCameraIndex, cv::CAP_DSHOW))
         {
-            QMessageBox::critical(nullptr, tr("Camera Error"), tr("Failed to open camera device."), QMessageBox::Ok);
+            QMessageBox::information(nullptr, tr("Camera Error"), tr("Failed to open camera device."), QMessageBox::Ok);
             return;
         }
 
@@ -201,7 +201,7 @@ void CameraService::applyVideoQuality(int formatIndex)
     }
     catch (const std::exception &e)
     {
-        QMessageBox::critical(nullptr, tr("Camera Error"), QString::fromStdString(e.what()), QMessageBox::Ok);
+        QMessageBox::information(nullptr, tr("Camera Error"), QString::fromStdString(e.what()), QMessageBox::Ok);
     }
 }
 
@@ -256,7 +256,7 @@ void CameraService::processFrame()
     }
     catch (const std::exception &e)
     {
-        QMessageBox::critical(nullptr, tr("Camera Error"), QString::fromStdString(e.what()), QMessageBox::Ok);
+        QMessageBox::information(nullptr, tr("Camera Error"), QString::fromStdString(e.what()), QMessageBox::Ok);
     }
 
     CoUninitialize(); // Clean up COM

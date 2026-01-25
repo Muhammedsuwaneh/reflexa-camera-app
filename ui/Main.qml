@@ -55,12 +55,22 @@ Window {
         }
 
         SettingsView {
+            id: settingsView
             Layout.row: 1
             Layout.column: 0
             Layout.fillHeight: true
             Layout.preferredWidth: 350
             z: 10
-            opacity: 0 || cameraControls.showSettings
+            opacity: 0
+
+            Connections
+            {
+                target: cameraControls
+                onShowSettingsChanged:
+                {
+                    settingsView.opacity = cameraControls.showSettings ? 1 : 0
+                }
+            }
 
             Behavior on opacity { NumberAnimation { duration: 180; easing.type: Easing.OutCubic } }
         }
@@ -72,7 +82,16 @@ Window {
             Layout.fillHeight: true
             Layout.preferredWidth: 350
             z: 10
-            opacity: 0 || cameraControls.showFilters
+            opacity: 0
+
+            Connections
+            {
+                target: cameraControls
+                onShowFiltersChanged:
+                {
+                    settingsView.opacity = cameraControls.showFilters ? 1 : 0
+                }
+            }
 
             Behavior on opacity { NumberAnimation { duration: 180; easing.type: Easing.OutCubic } }
         }

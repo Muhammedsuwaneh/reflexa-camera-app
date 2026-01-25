@@ -6,7 +6,7 @@ Item {
     id: root
 
     implicitWidth: 220
-    implicitHeight: 45
+    implicitHeight: 35
 
     property var model: []
     property int currentIndex: 0
@@ -42,6 +42,7 @@ Item {
             source: "../assets/dropdown.png"
             width: 7
             height: 7
+            Layout.rightMargin: 10
             fillMode: Image.PreserveAspectFit
             Layout.alignment: Qt.AlignVCenter
         }

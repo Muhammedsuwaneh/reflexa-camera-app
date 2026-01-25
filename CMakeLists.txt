@@ -54,6 +54,7 @@ qt_add_qml_module(appreflexaCameraApp
         QML_FILES ui/CustomComboBox.qml
         SOURCES controllers/ImageTextureController.h controllers/ImageTextureController.cpp
         SOURCES utilities/CameraWorker.h utilities/CameraWorker.cpp
+        QML_FILES ui/CustomSlider.qml
 
 )
 
