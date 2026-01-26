@@ -95,14 +95,14 @@ Window {
             {
                 id: gridLines
                 anchors.fill: parent
-                opacity: 0
+                visible: true
 
                 Connections
                 {
                     target: cameraControls
                     onGridIsActiveChanged:
                     {
-                        gridLines.opacity = cameraControls.gridIsActive ? 1 : 0
+                        gridLines.visible = cameraControls.gridIsActive ? 1 : 0
                     }
                 }
 
@@ -190,7 +190,6 @@ Window {
 
             onImageCaptured: {
                 flash.trigger()
-                console.log("captured")
             }
         }
     }

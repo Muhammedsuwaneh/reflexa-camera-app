@@ -36,7 +36,7 @@ class CameraService : public QObject
     Q_PROPERTY(int grayScale READ grayScale WRITE setGrayScale NOTIFY grayScaleChanged)
 
     // FILTERS
-    Q_PROPERTY(QString activeFilter READ activeFilter WRITE setActiveFilter NOTIFY activeFilterChanged);
+    Q_PROPERTY(QString activeFilter READ activeFilter WRITE setActiveFilter NOTIFY activeFilterChanged)
 
     Q_PROPERTY(bool capturingVideo READ capturingVideo NOTIFY capturingVideoChanged)
 

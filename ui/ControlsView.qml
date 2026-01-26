@@ -23,7 +23,6 @@ Rectangle {
         color: "#0b1a2a"
 
         Rectangle {
-            id: bg
             anchors.leftMargin: 30
             anchors.left: parent.left
             anchors.verticalCenter: parent.verticalCenter
@@ -35,7 +34,7 @@ Rectangle {
             antialiasing: true
             color: "transparent"
 
-            opacity: Camera.capturingVideo ? 0 : 1
+            visible: !Camera.capturingVideo
 
             Rectangle {
                 anchors.centerIn: parent
@@ -74,7 +73,7 @@ Rectangle {
                 Layout.alignment: Qt.AlignVCenter
                 onClicked: cameraControls.toggleFaceDetector()
 
-                opacity: Camera.capturingVideo ? 0 : 1
+                visible: !Camera.capturingVideo
             }
 
             CameraBehaviorButton {
@@ -83,7 +82,7 @@ Rectangle {
                 Layout.alignment: Qt.AlignVCenter
                 onClicked: cameraControls.toggleHDR()
 
-                opacity: Camera.capturingVideo ? 0 : 1
+                visible: !Camera.capturingVideo
             }
 
             CameraBehaviorButton {
@@ -92,7 +91,7 @@ Rectangle {
                 Layout.alignment: Qt.AlignVCenter
                 onClicked: cameraControls.toggleTimer()
 
-                opacity: Camera.capturingVideo ? 0 : 1
+                visible: !Camera.capturingVideo
             }
 
             CameraControlButton {
@@ -102,11 +101,15 @@ Rectangle {
                 Layout.alignment: Qt.AlignVCenter
                 onClicked:
                 {
+                    if(cameraControls.cameraButtonIsActive)
+                    {
+                        root.imageCaptured()
+                    }
+
                     cameraControls.onCameraPressed()
-                    root.imageCaptured()
                 }
 
-                opacity: Camera.capturingVideo ? 0 : 1
+                visible: !Camera.capturingVideo
             }
 
             CameraControlButton {
@@ -123,7 +126,7 @@ Rectangle {
                     }
                 }
 
-                opacity: Camera.capturingVideo ? 0 : 1
+                visible: !Camera.capturingVideo
             }
 
             CameraControlButton {
@@ -132,7 +135,7 @@ Rectangle {
                 Layout.alignment: Qt.AlignVCenter
                 onClicked: cameraControls.onQRPressed()
 
-                opacity: Camera.capturingVideo ? 0 : 1
+                visible: !Camera.capturingVideo
             }
 
             CameraBehaviorButton {
@@ -141,7 +144,7 @@ Rectangle {
                 Layout.alignment: Qt.AlignVCenter
                 onClicked: cameraControls.toggleGrid()
 
-                opacity: Camera.capturingVideo ? 0 : 1
+                visible: !Camera.capturingVideo
             }
         }
 
@@ -158,14 +161,14 @@ Rectangle {
                 root.stopRecording();
             }
 
-            opacity: 0
+            visible: false
 
             Connections
             {
                 target: Camera
                 onCapturingVideoChanged:
                 {
-                    stopButton.opacity = Camera.capturingVideo ? 1 : 0
+                    stopButton.visible = Camera.capturingVideo
                 }
             }
         }

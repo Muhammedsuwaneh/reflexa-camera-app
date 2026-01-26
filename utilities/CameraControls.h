@@ -60,15 +60,16 @@ signals:
     void showSettingsChanged();
     void showFiltersChanged();
 
+
 private:
     void activateCamera();
     void activateVideo();
     void activateQR();
 
-    bool m_hdrIsActive = false;
+    bool m_hdrIsActive = true;
     bool m_faceDetectorIsActive = false;
     bool m_timerIsActive = false;
-    bool m_gridIsActive = false;
+    bool m_gridIsActive = true;
 
     bool m_cameraButtonIsActive = true;
     bool m_videoButtonIsActive = false;
