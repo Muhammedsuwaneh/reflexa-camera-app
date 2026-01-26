@@ -5,6 +5,7 @@
 #include <QImage>
 #include <opencv2/opencv.hpp>
 #include <QThread>
+#include <QTimer>
 
 class CameraService : public QObject
 {
@@ -48,6 +49,8 @@ public:
     void record();
     void scanQR();
 
+    void init();
+
     int currentCameraIndex() const;
     void setCurrentCameraIndex(int newCurrentCameraIndex);
 
@@ -66,6 +69,9 @@ public:
 
     cv::Mat originalFrame() const;
     void setOriginalFrame(const cv::Mat &newOriginalFrame);
+
+    void startCamera();
+    void stopCamera();
 
 signals:
     void frameChanged();
@@ -90,11 +96,9 @@ private:
     //FaceDetector faceDetector;
     bool detectingFace = false;
 
-    QTimer* timer;
+    QTimer timer;
 
     void getCaptureData();
-    void startCamera();
-    void stopCamera();
     void processFrame();
 
     QStringList m_cameraNames;
@@ -106,7 +110,6 @@ private:
     Mode m_mode = Photo;
     cv::Mat m_originalFrame;
 
-    QThread* m_cameraThread = nullptr;
     std::atomic_bool running { false };
 };
 

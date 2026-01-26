@@ -133,7 +133,7 @@ Rectangle {
                 source: "image://camera/live"
 
                 Connections {
-                    target: camera
+                    target: Camera
 
                     function onFrameCleared() {
                         recentPhotoView.source = ""

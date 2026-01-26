@@ -48,7 +48,7 @@ Window {
                             }
 
                 Connections {
-                    target: camera
+                    target: Camera
 
                     function onFrameCleared() {
                         cameraView.source = ""
@@ -115,7 +115,7 @@ Window {
             anchors.right: parent.right
             anchors.bottom: controlsView.top
             anchors.rightMargin: 30
-            anchors.bottomMargin: 12
+            anchors.bottomMargin: 20
 
             property color backgroundColor: "#808080"
 

@@ -4,30 +4,12 @@
 #include <QCameraDevice>
 #include <QMessageBox>
 #include <opencv2/opencv.hpp>
-#include <thread>
 #include <algorithm>
-#include <Windows.h> // For CoInitializeEx / CoUninitialize
 
 CameraService::CameraService(QObject *parent)
     : QObject{parent}
 {
-    startCamera();
-}
-
-static QString formatVideoQuality(const QCameraFormat &f)
-{
-    return QString("%1 x %2  (%3–%4 FPS)")
-        .arg(f.resolution().width())
-        .arg(f.resolution().height())
-        .arg(int(f.minFrameRate()))
-        .arg(int(f.maxFrameRate()));
-}
-
-static QString formatPhotoQuality(const QSize &size)
-{
-    return QString("%1 x %2")
-    .arg(size.width())
-        .arg(size.height());
+    connect(&timer, &QTimer::timeout, this, &CameraService::processFrame);
 }
 
 inline QImage matToQImage(const cv::Mat& mat)
@@ -35,12 +17,31 @@ inline QImage matToQImage(const cv::Mat& mat)
     switch (mat.type())
     {
         case CV_8UC3:
-            return QImage(mat.data, mat.cols, mat.rows, mat.step, QImage::Format_BGR888).copy();
+            return QImage(
+                       mat.data,
+                       mat.cols,
+                       mat.rows,
+                       mat.step,
+                       QImage::Format_RGB888
+                       ).copy();
+
         case CV_8UC1:
-            return QImage(mat.data, mat.cols, mat.rows, mat.step, QImage::Format_Grayscale8).copy();
+            return QImage(
+                       mat.data,
+                       mat.cols,
+                       mat.rows,
+                       mat.step,
+                       QImage::Format_Grayscale8
+                       ).copy();
+
         default:
             return QImage();
     }
+}
+
+void CameraService::init()
+{
+    applyPhotoQuality(this->m_currentQualityIndex);
 }
 
 QImage CameraService::frame() const
@@ -58,81 +59,65 @@ void CameraService::startCamera()
     if (this->running)
         return;
 
-    this->running = true;
-
     getCaptureData();
 
-    if (!m_cap.open(0))
+    if (!this->cap.open(this->m_currentCameraIndex, cv::CAP_DSHOW))
     {
-        qCritical() << "Camera open failed";
+        qDebug() << "Camera open failed";
         return;
     }
 
-    this->cap.set(cv::CAP_PROP_FRAME_WIDTH, 1280);
-    cap.set(cv::CAP_PROP_FRAME_HEIGHT, 720);
-
-    this->m_timer.start(33); // 30FPS
-
-    /*m_cameraThread = QThread::create([this]()
-    {
-        // ✅ COM must be initialized in THIS thread
-        CoInitializeEx(nullptr, COINIT_MULTITHREADED);
-
-        // ✅ Use ONE backend only
-        if (!cap.open(m_currentCameraIndex, cv::CAP_DSHOW))
-        {
-            QMetaObject::invokeMethod(this, [] {
-                QMessageBox::critical(nullptr, "Camera Error", "Failed to open camera");
-            });
-            CoUninitialize();
-            return;
-        }
-
-        processFrame();
-
-        cap.release();
-        CoUninitialize();
-    });
-
-    m_cameraThread->start();*/
+    this->running = true;
+    this->timer.start(33); // 30FPS
 }
 
 void CameraService::stopCamera()
 {
-    running = false;
+    this->running = false;
+    this->timer.stop();
 
-    if (m_cameraThread)
-    {
-        m_cameraThread->quit();
-        m_cameraThread->wait();
-        delete m_cameraThread;
-        m_cameraThread = nullptr;
-    }
-
-    if (cap.isOpened())
-        cap.release();
+    if (this->cap.isOpened())
+        this->cap.release();
 
     emit frameCleared();
 }
 
 void CameraService::processFrame()
 {
-    while (running)
+    if (!running || !cap.isOpened())
+        return;
+
+    if (!cap.read(this->m_originalFrame) || m_originalFrame.empty())
+        return;
+
+    cv::cvtColor(this->m_originalFrame, this->m_originalFrame, cv::COLOR_BGR2RGB);
+
+    if(this->detectingFace)
     {
-        cv::Mat mat;
-        if (!cap.read(mat) || mat.empty())
-            continue;
-
-        cv::cvtColor(mat, mat, cv::COLOR_BGR2RGB);
-
-        this->m_originalFrame = mat.clone();
-        this->m_frame = matToQImage(mat);
-
-        emit originalFrameChanged();
-        emit frameChanged();
-
-        QThread::msleep(15);
+        qDebug() << "detecting face";
     }
+
+
+    this->m_frame = matToQImage(this->m_originalFrame);
+
+    emit originalFrameChanged();
+    emit frameChanged();
+}
+
+static QString formatVideoQuality(const QCameraFormat &f)
+{
+    return QString("%1 x %2  (%3–%4 FPS)")
+        .arg(f.resolution().width())
+        .arg(f.resolution().height())
+        .arg(int(f.minFrameRate()))
+        .arg(int(f.maxFrameRate()));
+}
+
+static QString formatPhotoQuality(const QSize &size)
+{
+    return QString("%1 x %2")
+    .arg(size.width())
+        .arg(size.height());
 }
 
 void CameraService::getCaptureData()
@@ -186,52 +171,39 @@ void CameraService::getCaptureData()
     }
 }
 
-void CameraService::applyPhotoQuality(int qualityIndex)
+
+void CameraService::applyPhotoQuality(int index)
 {
-    try
-    {
-        const auto devices = QMediaDevices::videoInputs();
-        if (devices.isEmpty()) return;
-        if (m_currentCameraIndex < 0 || m_currentCameraIndex >= devices.size()) return;
+    stopCamera();
 
-        const QCameraDevice &device = devices[m_currentCameraIndex];
-        QList<QSize> photoResolutions;
-        for (const QCameraFormat &f : device.videoFormats())
-            if (!photoResolutions.contains(f.resolution()))
-                photoResolutions << f.resolution();
+    const auto devices = QMediaDevices::videoInputs();
+    if (devices.isEmpty()) return;
 
-        if (qualityIndex < 0 || qualityIndex >= photoResolutions.size()) return;
+    const QCameraDevice &device = devices[m_currentCameraIndex];
+    QList<QSize> sizes;
 
-        const QSize size = photoResolutions[qualityIndex];
+    for (const QCameraFormat &f : device.videoFormats())
+        if (!sizes.contains(f.resolution()))
+            sizes << f.resolution();
 
-        if (running) stopCamera();
+    if (index < 0 || index >= sizes.size()) return;
 
-        cap.set(cv::CAP_PROP_FRAME_WIDTH, size.width());
-        cap.set(cv::CAP_PROP_FRAME_HEIGHT, size.height());
+    const QSize size = sizes[index];
 
-        QThread::msleep(50);
+    cap.set(cv::CAP_PROP_FRAME_WIDTH, size.width());
+    cap.set(cv::CAP_PROP_FRAME_HEIGHT, size.height());
 
-        if (!cap.open(m_currentCameraIndex))
-        {
-            QMessageBox::information(nullptr, tr("Camera Error"), tr("Failed to open camera device."), QMessageBox::Ok);
-            return;
-        }
-
-        setCurrentQualityIndex(qualityIndex);
-        running = true;
-
-        std::thread([this]() { processFrame(); }).detach();
-    }
-    catch (const std::exception &e)
-    {
-        QMessageBox::information(nullptr, tr("Camera Error"), QString::fromStdString(e.what()), QMessageBox::Ok);
-    }
+    setCurrentQualityIndex(index);
+    startCamera();
 }
+
 
 void CameraService::applyVideoQuality(int formatIndex)
 {
     try
     {
+        stopCamera();
+
         const auto devices = QMediaDevices::videoInputs();
         if (devices.isEmpty()) return;
         if (m_currentCameraIndex < 0 || m_currentCameraIndex >= devices.size()) return;
@@ -259,8 +231,7 @@ void CameraService::applyVideoQuality(int formatIndex)
         }
 
         setCurrentVideoQualityIndex(formatIndex);
-        running = true;
-        std::thread([this]() { processFrame(); }).detach();
+        startCamera();
     }
     catch (const std::exception &e)
     {
@@ -272,7 +243,7 @@ void CameraService::takeShot() { qDebug() << "Captured ..."; }
 void CameraService::record() { qDebug() << "Capturing ..."; }
 void CameraService::scanQR() { qDebug() << "Scanning QR ..."; }
 
-QStringList CameraService::cameraNames() const { return m_cameraNames; }
+QStringList CameraService::cameraNames() const { return this->m_cameraNames; }
 
 void CameraService::switchCam(int index)
 {
@@ -281,12 +252,12 @@ void CameraService::switchCam(int index)
     startCamera();
 }
 
-int CameraService::currentCameraIndex() const { return m_currentCameraIndex; }
+int CameraService::currentCameraIndex() const { return this->m_currentCameraIndex; }
 
 void CameraService::setCurrentCameraIndex(int newIndex)
 {
-    if (m_currentCameraIndex == newIndex) return;
-    m_currentCameraIndex = newIndex;
+    if (this->m_currentCameraIndex == newIndex) return;
+    this->m_currentCameraIndex = newIndex;
     emit cameraChanged();
 }
 
@@ -331,8 +302,8 @@ cv::Mat CameraService::originalFrame() const { return m_originalFrame; }
 
 void CameraService::setOriginalFrame(const cv::Mat &newFrame)
 {
-    m_originalFrame = newFrame;
-    m_frame = matToQImage(m_originalFrame);
+    this->m_originalFrame = newFrame;
+    this->m_frame = matToQImage(this->m_originalFrame);
 
     emit frameChanged();
     emit originalFrameChanged();

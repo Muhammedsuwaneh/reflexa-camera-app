@@ -27,20 +27,22 @@ int main(int argc, char *argv[])
 
     // controller and service objects
     CameraService camera;
+    camera.startCamera();
+
     WindowController windowController(window);
     CameraControls* cameraControls = new CameraControls(&camera);
     ImageFiltersController* filterController = new ImageFiltersController(&camera);
     ImageTextureController* textureController = new ImageTextureController(&camera);
 
-    engine.rootContext()->setContextProperty("cameraControls", cameraControls);
 
     // providers
     CameraImageProvider* cameraProvider = new CameraImageProvider(&camera);
     engine.addImageProvider("camera", cameraProvider);
 
     // context
-    engine.rootContext()->setContextProperty("WindowController", &windowController);
     engine.rootContext()->setContextProperty("Camera", &camera);
+    engine.rootContext()->setContextProperty("cameraControls", cameraControls);
+    engine.rootContext()->setContextProperty("WindowController", &windowController);
     engine.rootContext()->setContextProperty("ImageFiltersController", filterController);
     engine.rootContext()->setContextProperty("ImageTextureController", textureController);
 

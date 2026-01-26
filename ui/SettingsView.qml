@@ -140,7 +140,6 @@ Rectangle {
             }
 
 
-
             ColumnLayout {
                 Layout.topMargin: 15
                 Layout.row: 5
