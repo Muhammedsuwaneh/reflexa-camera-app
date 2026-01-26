@@ -90,6 +90,24 @@ Window {
                     flashTimer.restart()
                 }
             }
+
+            GridLines
+            {
+                id: gridLines
+                anchors.fill: parent
+                opacity: 0
+
+                Connections
+                {
+                    target: cameraControls
+                    onGridIsActiveChanged:
+                    {
+                        gridLines.opacity = cameraControls.gridIsActive ? 1 : 0
+                    }
+                }
+
+                Behavior on opacity { NumberAnimation { duration: 180; easing.type: Easing.OutCubic } }
+            }
         }
 
         RecordTimer

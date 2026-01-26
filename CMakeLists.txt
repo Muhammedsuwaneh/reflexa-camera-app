@@ -64,6 +64,7 @@ qt_add_qml_module(appreflexaCameraApp
         SOURCES utilities/FaceDetector.h utilities/FaceDetector.cpp
         models/res10_300x300_ssd_iter_140000.caffemodel
         models/deploy.prototxt
+        QML_FILES ui/GridLines.qml
 
 )
 
