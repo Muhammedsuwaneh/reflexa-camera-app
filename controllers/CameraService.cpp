@@ -55,14 +55,25 @@ void CameraService::setDetectingFace(bool detecting)
 
 void CameraService::startCamera()
 {
-    if (running)
+    if (this->running)
         return;
 
-    running = true;
+    this->running = true;
 
     getCaptureData();
 
-    m_cameraThread = QThread::create([this]()
+    if (!m_cap.open(0))
+    {
+        qCritical() << "Camera open failed";
+        return;
+    }
+
+    this->cap.set(cv::CAP_PROP_FRAME_WIDTH, 1280);
+    cap.set(cv::CAP_PROP_FRAME_HEIGHT, 720);
+
+    this->m_timer.start(33); // 30FPS
+
+    /*m_cameraThread = QThread::create([this]()
     {
         // ✅ COM must be initialized in THIS thread
         CoInitializeEx(nullptr, COINIT_MULTITHREADED);
@@ -83,7 +94,7 @@ void CameraService::startCamera()
         CoUninitialize();
     });
 
-    m_cameraThread->start();
+    m_cameraThread->start();*/
 }
 
 void CameraService::stopCamera()
@@ -108,13 +119,16 @@ void CameraService::processFrame()
 {
     while (running)
     {
-        cv::Mat frame;
-        if (!cap.read(frame) || frame.empty())
+        cv::Mat mat;
+        if (!cap.read(mat) || mat.empty())
             continue;
 
-        cv::cvtColor(frame, frame, cv::COLOR_BGR2RGB);
-        m_frame = matToQImage(frame);
+        cv::cvtColor(mat, mat, cv::COLOR_BGR2RGB);
 
+        this->m_originalFrame = mat.clone();
+        this->m_frame = matToQImage(mat);
+
+        emit originalFrameChanged();
         emit frameChanged();
 
         QThread::msleep(15);

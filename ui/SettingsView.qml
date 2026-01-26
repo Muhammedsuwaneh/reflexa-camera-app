@@ -108,13 +108,12 @@ Rectangle {
                     Layout.topMargin: 2
                     Layout.fillWidth: true
 
-                    onSliding: (value) => {
-                        console.log("sliding: " + value)
-                        //ImageTextureController.adjustBrightness(root.value)
+                    onSliding: (value) =>
+                    {
+                        ImageTextureController.zoomCapture(value)
                     }
                 }
             }
-
 
             ColumnLayout {
                 Layout.topMargin: 15
@@ -135,8 +134,7 @@ Rectangle {
                     Layout.fillWidth: true
 
                     onSliding: (value) => {
-                        console.log("sliding: " + value)
-                        //ImageTextureController.adjustBrightness(root.value)
+                        ImageTextureController.adjustBrightness(root.value)
                     }
                 }
             }
@@ -162,8 +160,7 @@ Rectangle {
                     Layout.fillWidth: true
 
                     onSliding: (value) => {
-                        console.log("sliding: " + value)
-                        //ImageTextureController.adjustBrightness(root.value)
+                        ImageTextureController.adjustContrast(root.value)
                     }
                 }
             }
@@ -189,8 +186,7 @@ Rectangle {
                     Layout.fillWidth: true
 
                     onSliding: (value) => {
-                        console.log("sliding: " + value)
-                        //ImageTextureController.adjustBrightness(root.value)
+                        ImageTextureController.adjustSaturation(root.value)
                     }
                 }
             }
@@ -216,7 +212,7 @@ Rectangle {
 
                     onSliding: (value) => {
                         console.log("sliding: " + value)
-                        //ImageTextureController.adjustBrightness(root.value)
+                        ImageTextureController.adjustExposure(root.value)
                     }
                 }
             }
@@ -242,7 +238,7 @@ Rectangle {
 
                     onSliding: (value) => {
                         console.log("sliding: " + value)
-                        //ImageTextureController.adjustBrightness(root.value)
+                        ImageTextureController.adjustGrayScale(root.value)
                     }
                 }
             }

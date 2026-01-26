@@ -4,6 +4,22 @@ ImageTextureController::ImageTextureController(CameraService* camera, QObject *p
     : QObject{parent}, m_camera(camera)
 {}
 
+void ImageTextureController::zoomCapture(double value)
+{
+    value = qBound(0.0, value, 100.0);
+
+    const double minZoom = 0.1;
+    const double maxZoom = 3.0;
+
+    double normalized = value / 100.0;
+    double newZoom = minZoom + normalized * (maxZoom - minZoom);
+
+    if (qFuzzyCompare(m_zoomFactor, newZoom))
+        return;
+
+    m_zoomFactor = newZoom;
+    emit zoomFactorChanged();
+}
 
 void ImageTextureController::adjustBrightness(int brightness)
 {
@@ -80,4 +96,9 @@ void ImageTextureController::adjustGrayScale(int)
     cv::cvtColor(gray, dst, cv::COLOR_GRAY2BGR);
 
     this->m_camera->setOriginalFrame(dst);
+}
+
+double ImageTextureController::zoomFactor() const
+{
+    return m_zoomFactor;
 }

@@ -40,6 +40,13 @@ Window {
                 smooth: true
                 source: "image://camera/live"
 
+                transform: Scale {
+                                origin.x: previewer.width / 2
+                                origin.y: previewer.height / 2
+                                xScale: ImageTextureController.zoomFactor
+                                yScale: ImageTextureController.zoomFactor
+                            }
+
                 Connections {
                     target: camera
 

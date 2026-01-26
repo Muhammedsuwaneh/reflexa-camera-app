@@ -6,6 +6,8 @@
 #include "controllers/WindowController.h"
 #include <QQmlContext>
 #include "utilities/CameraControls.h"
+#include "controllers/ImageFiltersController.h"
+#include "controllers/ImageTextureController.h"
 
 int main(int argc, char *argv[])
 {
@@ -27,6 +29,9 @@ int main(int argc, char *argv[])
     CameraService camera;
     WindowController windowController(window);
     CameraControls* cameraControls = new CameraControls(&camera);
+    ImageFiltersController* filterController = new ImageFiltersController(&camera);
+    ImageTextureController* textureController = new ImageTextureController(&camera);
+
     engine.rootContext()->setContextProperty("cameraControls", cameraControls);
 
     // providers
@@ -36,6 +41,8 @@ int main(int argc, char *argv[])
     // context
     engine.rootContext()->setContextProperty("WindowController", &windowController);
     engine.rootContext()->setContextProperty("Camera", &camera);
+    engine.rootContext()->setContextProperty("ImageFiltersController", filterController);
+    engine.rootContext()->setContextProperty("ImageTextureController", textureController);
 
 
     QObject::connect(

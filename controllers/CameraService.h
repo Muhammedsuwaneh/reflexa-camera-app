@@ -86,7 +86,6 @@ signals:
 private:
     QImage m_frame;
     cv::VideoCapture cap;
-    //bool running = false;
 
     //FaceDetector faceDetector;
     bool detectingFace = false;
