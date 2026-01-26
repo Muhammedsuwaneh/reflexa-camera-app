@@ -92,6 +92,30 @@ Window {
             }
         }
 
+        RecordTimer
+        {
+            id: recordTimer
+
+              Layout.row: 1
+              Layout.columnSpan: 3
+              Layout.alignment: Qt.AlignHCenter | Qt.AlignBottom
+              Layout.bottomMargin: 20
+
+              z: 25
+              opacity: 0
+
+            Connections
+            {
+                target: Camera
+                onCapturingVideoChanged:
+                {
+                    recordTimer.opacity = Camera.capturingVideo ? 1 : 0
+                }
+            }
+
+            Behavior on opacity { NumberAnimation { duration: 180; easing.type: Easing.OutCubic } }
+        }
+
         SettingsView {
             id: settingsView
             Layout.row: 1
@@ -184,6 +208,9 @@ Window {
             Layout.fillWidth: true
             Layout.preferredHeight: 100
             z: 20
+
+            onStartRecording: recordTimer.start()
+            onStopRecording:  recordTimer.stop()
 
             onImageCaptured: {
                 flash.trigger()

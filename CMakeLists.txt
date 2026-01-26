@@ -44,6 +44,7 @@ qt_add_qml_module(appreflexaCameraApp
         assets/timer.png
         assets/settings.png
         assets/qr.png
+        assets/stop.png
         assets/dropdown.png
         QML_FILES ui/TitleBar.qml
         QML_FILES ui/ControlButton.qml
@@ -59,6 +60,10 @@ qt_add_qml_module(appreflexaCameraApp
         QML_FILES ui/CustomSlider.qml
         SOURCES controllers/ImageFiltersController.h controllers/ImageFiltersController.cpp
         SOURCES utilities/CapturedImageProvider.h utilities/CapturedImageProvider.cpp
+        QML_FILES ui/RecordTimer.qml
+        SOURCES utilities/FaceDetector.h utilities/FaceDetector.cpp
+        models/res10_300x300_ssd_iter_140000.caffemodel
+        models/deploy.prototxt
 
 )
 

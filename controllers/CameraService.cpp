@@ -15,7 +15,7 @@
 CameraService::CameraService(QObject *parent)
     : QObject{parent}
 {
-    connect(&timer, &QTimer::timeout, this, &CameraService::processFrame);
+    connect(&timer, &QTimer::timeout, this, &CameraService::processFrame, Qt::DirectConnection);
 }
 
 inline QImage matToQImage(const cv::Mat& mat)
@@ -93,12 +93,12 @@ void CameraService::processFrame()
     if (!cap.read(this->m_originalFrame) || m_originalFrame.empty())
         return;
 
-    if(this->detectingFace)
-    {
-        qDebug() << "detecting face";
-    }
-
     this->m_processedFrame = this->m_originalFrame.clone();
+
+    /*if(this->detectingFace)
+    {
+        this->faceDetector.detect(this->m_processedFrame);
+    }*/
 
     applyLiveAdjustments();
     applyLiveFilters();
@@ -420,6 +420,8 @@ void CameraService::applyVideoQuality(int formatIndex)
 
 void CameraService::takeShot()
 {
+    qDebug() << "taking a shot....";
+
     if(this->m_processedFrame.empty()) return;
 
     QString picturesDir = QStandardPaths::writableLocation(QStandardPaths::PicturesLocation);
@@ -453,7 +455,30 @@ void CameraService::takeShot()
     }
 }
 
-void CameraService::record() { qDebug() << "Capturing ..."; }
+void CameraService::record()
+{
+    if(this->m_capturingVideo) return;
+
+    qDebug() << "Capturing video ....";
+
+    this->m_capturingVideo = true;
+    emit capturingVideoChanged();
+}
+
+void CameraService::stopVideoCapture()
+{
+    if (!this->m_capturingVideo)
+        return;
+
+    this->m_capturingVideo = false;
+
+    /*if (m_videoWriter.isOpened())
+        m_videoWriter.release();*/
+
+    emit capturingVideoChanged();
+    qDebug() << "Recording stopped ...";
+}
+
 void CameraService::scanQR() { qDebug() << "Scanning QR ..."; }
 
 QStringList CameraService::cameraNames() const { return this->m_cameraNames; }
@@ -611,11 +636,6 @@ void CameraService::setGrayScale(int newGrayScale)
     emit grayScaleChanged();
 }
 
-QImage CameraService::recentCaptured() const
-{
-    return m_recentCaptured;
-}
-
 void CameraService::setRecentCaptured(const QImage &newRecentCaptured)
 {
     if (m_recentCaptured == newRecentCaptured)
@@ -627,4 +647,37 @@ void CameraService::setRecentCaptured(const QImage &newRecentCaptured)
 bool CameraService::capturingVideo() const
 {
     return m_capturingVideo;
+}
+
+QImage CameraService::recentCaptured() const
+{
+    return m_recentCaptured;
+}
+
+
+CameraService::~CameraService()
+{
+    qDebug() << "CameraService destructor called";
+
+    if (timer.isActive())
+    {
+        timer.stop();
+    }
+
+    if (m_capturingVideo)
+    {
+        m_capturingVideo = false;
+        emit capturingVideoChanged();
+    }
+
+    if (cap.isOpened())
+    {
+        cap.release();
+    }
+
+    m_originalFrame.release();
+    m_processedFrame.release();
+
+    disconnect();
+    qDebug() << "CameraService cleaned up safely";
 }

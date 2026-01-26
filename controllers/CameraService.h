@@ -6,6 +6,7 @@
 #include <opencv2/opencv.hpp>
 #include <QThread>
 #include <QTimer>
+#include "utilities/FaceDetector.h"
 
 class CameraService : public QObject
 {
@@ -49,12 +50,15 @@ public:
     Q_PROPERTY(Mode mode READ mode WRITE setMode NOTIFY modeChanged)
 
     explicit CameraService(QObject *parent = nullptr);
+    ~CameraService();
 
     QImage frame() const;
     Q_INVOKABLE void setDetectingFace(bool detecting);
 
     QStringList cameraNames() const;
     Q_INVOKABLE void switchCam(int index);
+
+    Q_INVOKABLE void stopVideoCapture();
 
     Q_INVOKABLE void applyPhotoQuality(int index);
     Q_INVOKABLE void applyVideoQuality(int index);
@@ -154,8 +158,8 @@ private:
     QImage m_frame;
     cv::VideoCapture cap;
 
-    //FaceDetector faceDetector;
-    bool detectingFace = false;
+    FaceDetector faceDetector;
+    bool detectingFace = true;
 
     QTimer timer;
 
@@ -200,7 +204,7 @@ private:
 
     QString m_activeFilter = "";
     QImage m_recentCaptured;
-    bool m_capturingVideo;
+    bool m_capturingVideo = false;
 };
 
 #endif // CAMERASERVICE_H
