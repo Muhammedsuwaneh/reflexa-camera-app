@@ -107,7 +107,7 @@ Window {
 
             anchors.right: parent.right
             anchors.bottom: controlsView.top
-            anchors.rightMargin: 20
+            anchors.rightMargin: 30
             anchors.bottomMargin: 12
 
             property color backgroundColor: "#808080"

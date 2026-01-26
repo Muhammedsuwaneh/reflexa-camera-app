@@ -1,6 +1,5 @@
 #include "CameraService.h"
 #include <QDebug>
-#include <QThread>
 #include <QMediaDevices>
 #include <QCameraDevice>
 #include <QMessageBox>
@@ -56,20 +55,70 @@ void CameraService::setDetectingFace(bool detecting)
 
 void CameraService::startCamera()
 {
-    if (!cap.open(0))
-    {
-        QMessageBox::information(nullptr, tr("Camera Error"), tr("Failed to open camera device."), QMessageBox::Ok);
+    if (running)
         return;
+
+    running = true;
+
+    getCaptureData();
+
+    m_cameraThread = QThread::create([this]()
+    {
+        // ✅ COM must be initialized in THIS thread
+        CoInitializeEx(nullptr, COINIT_MULTITHREADED);
+
+        // ✅ Use ONE backend only
+        if (!cap.open(m_currentCameraIndex, cv::CAP_DSHOW))
+        {
+            QMetaObject::invokeMethod(this, [] {
+                QMessageBox::critical(nullptr, "Camera Error", "Failed to open camera");
+            });
+            CoUninitialize();
+            return;
+        }
+
+        processFrame();
+
+        cap.release();
+        CoUninitialize();
+    });
+
+    m_cameraThread->start();
+}
+
+void CameraService::stopCamera()
+{
+    running = false;
+
+    if (m_cameraThread)
+    {
+        m_cameraThread->quit();
+        m_cameraThread->wait();
+        delete m_cameraThread;
+        m_cameraThread = nullptr;
     }
 
-    setDetectingFace(false);
+    if (cap.isOpened())
+        cap.release();
 
-    //getCaptureData();
+    emit frameCleared();
+}
 
-    setCurrentQualityIndex(m_currentQualityIndex);
-    this->running = true;
+void CameraService::processFrame()
+{
+    while (running)
+    {
+        cv::Mat frame;
+        if (!cap.read(frame) || frame.empty())
+            continue;
 
-    std::thread([this]() { processFrame(); }).detach();
+        cv::cvtColor(frame, frame, cv::COLOR_BGR2RGB);
+        m_frame = matToQImage(frame);
+
+        emit frameChanged();
+
+        QThread::msleep(15);
+    }
 }
 
 void CameraService::getCaptureData()
@@ -208,59 +257,6 @@ void CameraService::applyVideoQuality(int formatIndex)
 void CameraService::takeShot() { qDebug() << "Captured ..."; }
 void CameraService::record() { qDebug() << "Capturing ..."; }
 void CameraService::scanQR() { qDebug() << "Scanning QR ..."; }
-
-void CameraService::stopCamera()
-{
-    try
-    {
-        running = false;
-        if (cap.isOpened()) cap.release();
-        m_frame = QImage();
-        emit frameCleared();
-    }
-    catch (const std::exception &e)
-    {
-        qDebug() << "StopCamera error:" << e.what();
-    }
-}
-
-void CameraService::processFrame()
-{
-    // Initialize COM for this thread
-    CoInitializeEx(nullptr, COINIT_MULTITHREADED);
-
-    try
-    {
-        while (running)
-        {
-            cap >> m_originalFrame;
-            if (m_originalFrame.empty()) continue;
-
-            if (detectingFace)
-            {
-                // Face detection logic
-            }
-            else if (m_mode == QRCode)
-            {
-                // QR scan logic
-            }
-
-            cv::cvtColor(m_originalFrame, m_originalFrame, cv::COLOR_BGR2RGB);
-            m_frame = matToQImage(m_originalFrame);
-
-            emit frameChanged();
-            emit originalFrameChanged();
-
-            QThread::msleep(15);
-        }
-    }
-    catch (const std::exception &e)
-    {
-        QMessageBox::information(nullptr, tr("Camera Error"), QString::fromStdString(e.what()), QMessageBox::Ok);
-    }
-
-    CoUninitialize(); // Clean up COM
-}
 
 QStringList CameraService::cameraNames() const { return m_cameraNames; }
 

@@ -4,7 +4,7 @@
 #include <QObject>
 #include <QImage>
 #include <opencv2/opencv.hpp>
-#include "utilities/CameraWorker.h"
+#include <QThread>
 
 class CameraService : public QObject
 {
@@ -86,7 +86,7 @@ signals:
 private:
     QImage m_frame;
     cv::VideoCapture cap;
-    bool running = false;
+    //bool running = false;
 
     //FaceDetector faceDetector;
     bool detectingFace = false;
@@ -107,7 +107,8 @@ private:
     Mode m_mode = Photo;
     cv::Mat m_originalFrame;
 
-    CameraWorker* worker;
+    QThread* m_cameraThread = nullptr;
+    std::atomic_bool running { false };
 };
 
 #endif // CAMERASERVICE_H
