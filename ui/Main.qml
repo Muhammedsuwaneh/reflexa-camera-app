@@ -177,48 +177,6 @@ Window {
             Behavior on opacity { NumberAnimation { duration: 180; easing.type: Easing.OutCubic } }
         }
 
-        Button
-        {
-            id: filtersButton
-            width: 150
-            height: 28
-            flat: true
-            z: 30
-
-            anchors.right: parent.right
-            anchors.bottom: controlsView.top
-            anchors.rightMargin: 30
-            anchors.bottomMargin: 20
-
-            property color backgroundColor: "#808080"
-
-            background: Rectangle {
-                radius: 10
-                color: backgroundColor
-                opacity: buttonMouseArea.containsMouse ? 0.75 : 1
-            }
-
-            contentItem: Text {
-                text: "FILTERS"
-                color: "#333"
-                font.pixelSize: 12
-                anchors.centerIn: parent
-            }
-
-            MouseArea {
-                id: buttonMouseArea
-                anchors.fill: parent
-                hoverEnabled: true
-                cursorShape: Qt.PointingHandCursor
-
-                onClicked: cameraControls.toggleFilters()
-            }
-
-            Behavior on opacity {
-                NumberAnimation { duration: 150 }
-            }
-        }
-
         ControlsView {
             id: controlsView
             Layout.row: 2
@@ -234,6 +192,48 @@ Window {
                 flash.trigger()
                 console.log("captured")
             }
+        }
+    }
+
+    Button
+    {
+        id: filtersButton
+        width: 60
+        height: 28
+        flat: true
+        z: 30
+
+        anchors.right: parent.right
+        anchors.bottom: parent.bottom
+        anchors.rightMargin: 30
+        anchors.bottomMargin: 120
+
+        property color backgroundColor: "#808080"
+
+        background: Rectangle {
+            radius: 10
+            color: backgroundColor
+            opacity: buttonMouseArea.containsMouse ? 0.75 : 1
+        }
+
+        contentItem: Text {
+            text: "FILTERS"
+            color: "#333"
+            font.pixelSize: 12
+            anchors.centerIn: parent
+        }
+
+        MouseArea {
+            id: buttonMouseArea
+            anchors.fill: parent
+            hoverEnabled: true
+            cursorShape: Qt.PointingHandCursor
+
+            onClicked: cameraControls.toggleFilters()
+        }
+
+        Behavior on opacity {
+            NumberAnimation { duration: 150 }
         }
     }
 }

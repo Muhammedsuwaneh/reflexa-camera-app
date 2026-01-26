@@ -686,7 +686,7 @@ QImage CameraService::recentCaptured() const
 
 CameraService::~CameraService()
 {
-    qDebug() << "CameraService destructor called";
+   qDebug() << "CameraService destructor called";
 
     if (this->timer.isActive())
     {
