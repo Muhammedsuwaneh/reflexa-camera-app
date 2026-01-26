@@ -95,10 +95,10 @@ void CameraService::processFrame()
 
     this->m_processedFrame = this->m_originalFrame.clone();
 
-    /*if(this->detectingFace)
+    if(this->detectingFace)
     {
         this->faceDetector.detect(this->m_processedFrame);
-    }*/
+    }
 
     applyLiveAdjustments();
     applyLiveFilters();
@@ -132,6 +132,10 @@ void CameraService::applyLiveFilters()
         applySkinSmoothing();
     else if (this->m_activeFilter == "Sepia (Warm)")
         applySepia();
+    else
+    {
+        this->m_grayScale = 0;
+    }
 }
 
 
@@ -223,12 +227,15 @@ void CameraService::adjustGrayScale()
 void CameraService::applyGrayScale()
 {
     m_grayScale = 100;
+    emit grayScaleChanged();
     adjustGrayScale();
 }
 
 void CameraService::applyInvert()
-{
+{    
     if (this->m_processedFrame.empty()) return;
+
+    this->m_grayScale = 0;
 
     cv::Mat inverted;
     cv::bitwise_not(this->m_processedFrame, inverted);
@@ -237,8 +244,10 @@ void CameraService::applyInvert()
 }
 
 void CameraService::applyHighContrast()
-{
+{   
     if (this->m_processedFrame.empty()) return;
+
+    this->m_grayScale = 0;
 
     cv::Mat contrast;
     this->m_processedFrame.convertTo(contrast, -1, 1.8, -50);
@@ -249,6 +258,8 @@ void CameraService::applyHighContrast()
 void CameraService::applyGaussianBlur()
 {
     if (this->m_processedFrame.empty()) return;
+
+    this->m_grayScale = 0;
 
     cv::Mat blurred;
     cv::GaussianBlur(this->m_processedFrame, blurred, cv::Size(9, 9), 0);
@@ -269,6 +280,8 @@ void CameraService::applySkinSmoothing()
 void CameraService::applySepia()
 {
     if (this->m_processedFrame.empty()) return;
+
+    this->m_grayScale = 0;
 
     cv::Mat sepia;
     cv::Mat kernel = (cv::Mat_<float>(3,3) <<
@@ -420,8 +433,6 @@ void CameraService::applyVideoQuality(int formatIndex)
 
 void CameraService::takeShot()
 {
-    qDebug() << "taking a shot....";
-
     if(this->m_processedFrame.empty()) return;
 
     QString picturesDir = QStandardPaths::writableLocation(QStandardPaths::PicturesLocation);
@@ -490,7 +501,10 @@ void CameraService::switchCam(int index)
     startCamera();
 }
 
-int CameraService::currentCameraIndex() const { return this->m_currentCameraIndex; }
+int CameraService::currentCameraIndex() const
+{
+    return this->m_currentCameraIndex;
+}
 
 void CameraService::setCurrentCameraIndex(int newIndex)
 {
@@ -499,23 +513,37 @@ void CameraService::setCurrentCameraIndex(int newIndex)
     emit cameraChanged();
 }
 
-QStringList CameraService::camQualities() const { return m_camQualities; }
-int CameraService::currentQualityIndex() const { return m_currentQualityIndex; }
+QStringList CameraService::camQualities() const
+{
+    return this->m_camQualities;
+}
+
+int CameraService::currentQualityIndex() const
+{
+    return this->m_currentQualityIndex;
+}
 
 void CameraService::setCurrentQualityIndex(int newIndex)
 {
-    if (m_currentQualityIndex == newIndex) return;
-    m_currentQualityIndex = newIndex;
+    if (this->m_currentQualityIndex == newIndex) return;
+    this->m_currentQualityIndex = newIndex;
     emit currentQualityIndexChanged();
 }
 
-QStringList CameraService::videoQualities() const { return m_videoQualities; }
-int CameraService::currentVideoQualityIndex() const { return m_currentVideoQualityIndex; }
+QStringList CameraService::videoQualities() const
+{
+    return this->m_videoQualities;
+}
+
+int CameraService::currentVideoQualityIndex() const
+{
+    return this->m_currentVideoQualityIndex;
+}
 
 void CameraService::setCurrentVideoQualityIndex(int newIndex)
 {
-    if (m_currentVideoQualityIndex == newIndex) return;
-    m_currentVideoQualityIndex = newIndex;
+    if (this->m_currentVideoQualityIndex == newIndex) return;
+    this->m_currentVideoQualityIndex = newIndex;
     emit currentVideoQualityIndexChanged();
 }
 
@@ -523,8 +551,9 @@ CameraService::Mode CameraService::mode() const { return m_mode; }
 
 void CameraService::setMode(const Mode &newMode)
 {
-    if (m_mode == newMode) return;
-    m_mode = newMode;
+    if (this->m_mode == newMode) return;
+
+    this->m_mode = newMode;
 
     switch (newMode)
     {
@@ -549,14 +578,14 @@ void CameraService::setOriginalFrame(const cv::Mat &newFrame)
 
 int CameraService::brightness() const
 {
-    return m_brightness;
+    return this->m_brightness;
 }
 
 void CameraService::setBrightness(int newBrightness)
 {
-    if (m_brightness == newBrightness)
+    if (this->m_brightness == newBrightness)
         return;
-    m_brightness = newBrightness;
+    this->m_brightness = newBrightness;
     emit brightnessChanged();
 }
 
@@ -567,33 +596,33 @@ cv::Mat CameraService::processedFrame() const
 
 void CameraService::setProcessedFrame(const cv::Mat &newProcessedFrame)
 {
-    m_processedFrame = newProcessedFrame;
+    this->m_processedFrame = newProcessedFrame;
     emit processedFrameChanged();
 }
 
 QString CameraService::activeFilter() const
 {
-    return m_activeFilter;
+    return this->m_activeFilter;
 }
 
 void CameraService::setActiveFilter(const QString &newActiveFilter)
 {
-    if (m_activeFilter == newActiveFilter)
+    if (this->m_activeFilter == newActiveFilter)
         return;
-    m_activeFilter = newActiveFilter;
+    this->m_activeFilter = newActiveFilter;
     emit activeFilterChanged();
 }
 
 int CameraService::contrast() const
 {
-    return m_contrast;
+    return this->m_contrast;
 }
 
 void CameraService::setContrast(int newContrast)
 {
-    if (m_contrast == newContrast)
+    if (this->m_contrast == newContrast)
         return;
-    m_contrast = newContrast;
+    this->m_contrast = newContrast;
     emit contrastChanged();
 }
 
@@ -604,28 +633,28 @@ int CameraService::saturation() const
 
 void CameraService::setSaturation(int newSaturation)
 {
-    if (m_saturation == newSaturation)
+    if (this->m_saturation == newSaturation)
         return;
-    m_saturation = newSaturation;
+    this->m_saturation = newSaturation;
     emit saturationChanged();
 }
 
 int CameraService::exposure() const
 {
-    return m_exposure;
+    return this->m_exposure;
 }
 
 void CameraService::setExposure(int newExposure)
 {
-    if (m_exposure == newExposure)
+    if (this->m_exposure == newExposure)
         return;
-    m_exposure = newExposure;
+    this->m_exposure = newExposure;
     emit exposureChanged();
 }
 
 int CameraService::grayScale() const
 {
-    return m_grayScale;
+    return this->m_grayScale;
 }
 
 void CameraService::setGrayScale(int newGrayScale)
@@ -638,20 +667,20 @@ void CameraService::setGrayScale(int newGrayScale)
 
 void CameraService::setRecentCaptured(const QImage &newRecentCaptured)
 {
-    if (m_recentCaptured == newRecentCaptured)
+    if (this->m_recentCaptured == newRecentCaptured)
         return;
-    m_recentCaptured = newRecentCaptured;
+    this->m_recentCaptured = newRecentCaptured;
     emit recentCapturedChanged();
 }
 
 bool CameraService::capturingVideo() const
 {
-    return m_capturingVideo;
+    return this->m_capturingVideo;
 }
 
 QImage CameraService::recentCaptured() const
 {
-    return m_recentCaptured;
+    return this->m_recentCaptured;
 }
 
 
@@ -659,14 +688,14 @@ CameraService::~CameraService()
 {
     qDebug() << "CameraService destructor called";
 
-    if (timer.isActive())
+    if (this->timer.isActive())
     {
         timer.stop();
     }
 
-    if (m_capturingVideo)
+    if (this->m_capturingVideo)
     {
-        m_capturingVideo = false;
+        this->m_capturingVideo = false;
         emit capturingVideoChanged();
     }
 
@@ -675,8 +704,8 @@ CameraService::~CameraService()
         cap.release();
     }
 
-    m_originalFrame.release();
-    m_processedFrame.release();
+    this->m_originalFrame.release();
+    this->m_processedFrame.release();
 
     disconnect();
     qDebug() << "CameraService cleaned up safely";

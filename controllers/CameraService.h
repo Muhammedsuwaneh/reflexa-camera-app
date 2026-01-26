@@ -159,7 +159,7 @@ private:
     cv::VideoCapture cap;
 
     FaceDetector faceDetector;
-    bool detectingFace = true;
+    bool detectingFace = false;
 
     QTimer timer;
 

@@ -46,6 +46,7 @@ public:
 
     bool showSettings() const;
     bool showFilters() const;
+
 signals:
     void hdrIsActiveChanged();
     void faceDetectorIsActiveChanged();
@@ -65,7 +66,7 @@ private:
     void activateQR();
 
     bool m_hdrIsActive = false;
-    bool m_faceDetectorIsActive = true;
+    bool m_faceDetectorIsActive = false;
     bool m_timerIsActive = false;
     bool m_gridIsActive = false;
 

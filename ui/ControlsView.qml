@@ -154,7 +154,6 @@ Rectangle {
             Layout.alignment: Qt.AlignVCenter
             onClicked:
             {
-                // show recorders
                 Camera.stopVideoCapture();
                 root.stopRecording();
             }
@@ -163,6 +162,7 @@ Rectangle {
 
             Connections
             {
+                target: Camera
                 onCapturingVideoChanged:
                 {
                     stopButton.opacity = Camera.capturingVideo ? 1 : 0
