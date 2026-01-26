@@ -10,6 +10,8 @@ Rectangle {
     height: 100
     width: parent.width
 
+    signal imageCaptured()
+
     Rectangle {
         id: background
         anchors.fill: parent
@@ -85,7 +87,11 @@ Rectangle {
                 iconSource: "../assets/camera.png"
                 isActive: cameraControls.cameraButtonIsActive
                 Layout.alignment: Qt.AlignVCenter
-                onClicked: cameraControls.onCameraPressed()
+                onClicked:
+                {
+                    cameraControls.onCameraPressed()
+                    root.imageCaptured()
+                }
             }
 
             CameraControlButton {
@@ -121,7 +127,7 @@ Rectangle {
             border.color: "#fff"
             border.width: 2
             antialiasing: true
-            color: "#807E7E"
+            color: "#18181B"
 
             Image
             {
@@ -130,17 +136,13 @@ Rectangle {
                 height: 60
                 anchors.centerIn: parent
                 fillMode: Image.PreserveAspectFit
-                source: "image://camera/live"
+                source: "image://captured/current"
 
                 Connections {
                     target: Camera
 
-                    function onFrameCleared() {
-                        recentPhotoView.source = ""
-                    }
-
-                    function onFrameChanged() {
-                        recentPhotoView.source = "image://camera/live?" + Date.now()
+                    function onRecentCapturedChanged() {
+                        recentPhotoView.source = "image://captured/current?" + Date.now()
                     }
                 }
             }

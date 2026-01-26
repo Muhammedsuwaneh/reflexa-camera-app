@@ -11,15 +11,6 @@ public:
     explicit ImageFiltersController(CameraService* camera, QObject* parent = nullptr);
 
     Q_INVOKABLE void applyFilter(const QString& filter);
-
-private:
-    void applyGrayScale();
-    void applyInvert();
-    void applyHighContrast();
-    void applyGaussianBlur();
-    void applySkinSmoothing();
-    void applySepia();
-
     CameraService* m_camera;
 };
 

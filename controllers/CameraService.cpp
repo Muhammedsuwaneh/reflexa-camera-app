@@ -6,6 +6,12 @@
 #include <opencv2/opencv.hpp>
 #include <algorithm>
 
+#include <QDateTime>
+#include <QStandardPaths>
+#include <QDir>
+#include <QDebug>
+#include <QString>
+
 CameraService::CameraService(QObject *parent)
     : QObject{parent}
 {
@@ -14,25 +20,22 @@ CameraService::CameraService(QObject *parent)
 
 inline QImage matToQImage(const cv::Mat& mat)
 {
+    if (mat.empty())
+        return QImage();
+
     switch (mat.type())
     {
-        case CV_8UC3:
-            return QImage(
-                       mat.data,
-                       mat.cols,
-                       mat.rows,
-                       mat.step,
-                       QImage::Format_RGB888
-                       ).copy();
-
         case CV_8UC1:
-            return QImage(
-                       mat.data,
-                       mat.cols,
-                       mat.rows,
-                       mat.step,
-                       QImage::Format_Grayscale8
-                       ).copy();
+            return QImage(mat.data, mat.cols, mat.rows, mat.step,
+                          QImage::Format_Grayscale8).copy();
+
+        case CV_8UC3:
+            return QImage(mat.data, mat.cols, mat.rows, mat.step,
+                          QImage::Format_BGR888).copy();
+
+        case CV_8UC4:
+            return QImage(mat.data, mat.cols, mat.rows, mat.step,
+                          QImage::Format_RGBA8888).copy();
 
         default:
             return QImage();
@@ -90,19 +93,195 @@ void CameraService::processFrame()
     if (!cap.read(this->m_originalFrame) || m_originalFrame.empty())
         return;
 
-    cv::cvtColor(this->m_originalFrame, this->m_originalFrame, cv::COLOR_BGR2RGB);
-
     if(this->detectingFace)
     {
         qDebug() << "detecting face";
     }
 
+    this->m_processedFrame = this->m_originalFrame.clone();
 
-    this->m_frame = matToQImage(this->m_originalFrame);
+    applyLiveAdjustments();
+    applyLiveFilters();
+
+    this->m_frame = matToQImage(this->m_processedFrame);
 
     emit originalFrameChanged();
     emit frameChanged();
 }
+
+void CameraService::applyLiveAdjustments()
+{
+    if (m_brightness != 0) adjustBrightness();
+    if (m_contrast != 0)   adjustContrast();
+    if (m_saturation != 100) adjustSaturation();
+    if (m_exposure != 0)   adjustExposure();
+    if (m_grayScale > 0)   adjustGrayScale();
+}
+
+void CameraService::applyLiveFilters()
+{
+    if (this->m_activeFilter == "Gray Scale")
+        applyGrayScale();
+    else if (this->m_activeFilter == "Negative / Invert")
+        applyInvert();
+    else if (this->m_activeFilter == "High Contrast")
+        applyHighContrast();
+    else if (this->m_activeFilter == "Gaussian Blur")
+        applyGaussianBlur();
+    else if (this->m_activeFilter == "Skin Smoothing")
+        applySkinSmoothing();
+    else if (this->m_activeFilter == "Sepia (Warm)")
+        applySepia();
+}
+
+
+void CameraService::adjustBrightness()
+{
+    if (this->m_processedFrame.empty()) return;
+
+    cv::Mat dst;
+    this->m_processedFrame.convertTo(dst, -1, 1.0, this->m_brightness);
+
+    setProcessedFrame(dst);
+}
+
+void CameraService::adjustContrast()
+{
+    if (this->m_processedFrame.empty()) return;
+
+    double alpha = std::clamp(this->m_contrast / 100.0 + 1.0, 0.0, 3.0);
+
+    cv::Mat dst;
+    this->m_processedFrame.convertTo(dst, -1, alpha, 0);
+
+    setProcessedFrame(dst);
+}
+
+void CameraService::adjustSaturation()
+{
+    if (this->m_processedFrame.empty() || this->m_processedFrame.channels() < 3) return;
+
+    cv::Mat hsv;
+    cv::cvtColor(this->m_processedFrame, hsv, cv::COLOR_BGR2HSV);
+
+    std::vector<cv::Mat> channels;
+    cv::split(hsv, channels);
+
+    double scale = std::clamp(this->m_saturation / 100.0, 0.0, 3.0);
+    channels[1].convertTo(channels[1], -1, scale, 0);
+
+    cv::merge(channels, hsv);
+
+    cv::Mat dst;
+    cv::cvtColor(hsv, dst, cv::COLOR_HSV2BGR);
+
+    setProcessedFrame(dst);
+}
+
+void CameraService::adjustExposure()
+{
+    if (this->m_processedFrame.empty()) return;
+
+    double gamma = std::clamp(this->m_exposure / 100.0 + 1.0, 0.1, 3.0);
+
+    cv::Mat dst;
+    cv::Mat f;
+    this->m_processedFrame.convertTo(f, CV_32F, 1.0 / 255.0);
+
+    cv::pow(f, 1.0 / gamma, f);
+    f *= 255.0;
+    f.convertTo(dst, CV_8U);
+
+    setProcessedFrame(dst);
+}
+
+void CameraService::adjustGrayScale()
+{
+    if (m_grayScale <= 0)
+        return;
+
+    if (m_processedFrame.empty())
+        return;
+
+    cv::Mat gray, grayRGB, blended;
+
+    cv::cvtColor(m_processedFrame, gray, cv::COLOR_RGB2GRAY);
+    cv::cvtColor(gray, grayRGB, cv::COLOR_GRAY2RGB);
+
+    double g = std::clamp(m_grayScale / 100.0, 0.0, 1.0);
+
+    cv::addWeighted(
+        m_processedFrame, 1.0 - g,
+        grayRGB, g,
+        0.0,
+        blended
+        );
+
+    setProcessedFrame(blended);
+}
+
+void CameraService::applyGrayScale()
+{
+    m_grayScale = 100;
+    adjustGrayScale();
+}
+
+void CameraService::applyInvert()
+{
+    if (this->m_processedFrame.empty()) return;
+
+    cv::Mat inverted;
+    cv::bitwise_not(this->m_processedFrame, inverted);
+
+    setProcessedFrame(inverted);
+}
+
+void CameraService::applyHighContrast()
+{
+    if (this->m_processedFrame.empty()) return;
+
+    cv::Mat contrast;
+    this->m_processedFrame.convertTo(contrast, -1, 1.8, -50);
+
+    setProcessedFrame(contrast);
+}
+
+void CameraService::applyGaussianBlur()
+{
+    if (this->m_processedFrame.empty()) return;
+
+    cv::Mat blurred;
+    cv::GaussianBlur(this->m_processedFrame, blurred, cv::Size(9, 9), 0);
+
+    setProcessedFrame(blurred);
+}
+
+void CameraService::applySkinSmoothing()
+{
+    if (this->m_processedFrame.empty()) return;
+
+    cv::Mat smooth;
+    cv::bilateralFilter(this->m_processedFrame, smooth, 9, 75, 75);
+
+    setProcessedFrame(smooth);
+}
+
+void CameraService::applySepia()
+{
+    if (this->m_processedFrame.empty()) return;
+
+    cv::Mat sepia;
+    cv::Mat kernel = (cv::Mat_<float>(3,3) <<
+                          0.272, 0.534, 0.131,
+                      0.349, 0.686, 0.168,
+                      0.393, 0.769, 0.189);
+
+    cv::transform(this->m_processedFrame, sepia, kernel);
+    sepia.convertTo(sepia, CV_8UC3);
+
+    setProcessedFrame(sepia);
+}
+
 
 static QString formatVideoQuality(const QCameraFormat &f)
 {
@@ -239,7 +418,41 @@ void CameraService::applyVideoQuality(int formatIndex)
     }
 }
 
-void CameraService::takeShot() { qDebug() << "Captured ..."; }
+void CameraService::takeShot()
+{
+    if(this->m_processedFrame.empty()) return;
+
+    QString picturesDir = QStandardPaths::writableLocation(QStandardPaths::PicturesLocation);
+
+    QDir dir(picturesDir + "/ReflexaCamCaptures");
+    if (!dir.exists())
+        dir.mkpath(".");
+
+    QString fileName =
+        dir.filePath("IMG_" +
+                     QDateTime::currentDateTime().toString("yyyyMMdd_HHmmss") +
+                     ".jpg");
+
+    std::string path = fileName.toStdString();
+
+    std::vector<int> params = {
+        cv::IMWRITE_JPEG_QUALITY, 95
+    };
+
+    cv::Mat frameToSave = this->m_processedFrame.clone();
+
+    bool success = cv::imwrite(path, frameToSave, params);
+
+    if (success)
+    {
+        setRecentCaptured(matToQImage(frameToSave));
+    }
+    else
+    {
+        qDebug() << "Failed to save image";
+    }
+}
+
 void CameraService::record() { qDebug() << "Capturing ..."; }
 void CameraService::scanQR() { qDebug() << "Scanning QR ..."; }
 
@@ -290,8 +503,8 @@ void CameraService::setMode(const Mode &newMode)
 
     switch (newMode)
     {
-        case Photo: applyPhotoQuality(m_currentQualityIndex); break;
-        case Video: applyVideoQuality(m_currentQualityIndex); break;
+        case Photo: applyPhotoQuality(this->m_currentQualityIndex); break;
+        case Video: applyVideoQuality(this->m_currentQualityIndex); break;
         case QRCode: break;
     }
 
@@ -307,4 +520,111 @@ void CameraService::setOriginalFrame(const cv::Mat &newFrame)
 
     emit frameChanged();
     emit originalFrameChanged();
+}
+
+int CameraService::brightness() const
+{
+    return m_brightness;
+}
+
+void CameraService::setBrightness(int newBrightness)
+{
+    if (m_brightness == newBrightness)
+        return;
+    m_brightness = newBrightness;
+    emit brightnessChanged();
+}
+
+cv::Mat CameraService::processedFrame() const
+{
+    return m_processedFrame;
+}
+
+void CameraService::setProcessedFrame(const cv::Mat &newProcessedFrame)
+{
+    m_processedFrame = newProcessedFrame;
+    emit processedFrameChanged();
+}
+
+QString CameraService::activeFilter() const
+{
+    return m_activeFilter;
+}
+
+void CameraService::setActiveFilter(const QString &newActiveFilter)
+{
+    if (m_activeFilter == newActiveFilter)
+        return;
+    m_activeFilter = newActiveFilter;
+    emit activeFilterChanged();
+}
+
+int CameraService::contrast() const
+{
+    return m_contrast;
+}
+
+void CameraService::setContrast(int newContrast)
+{
+    if (m_contrast == newContrast)
+        return;
+    m_contrast = newContrast;
+    emit contrastChanged();
+}
+
+int CameraService::saturation() const
+{
+    return m_saturation;
+}
+
+void CameraService::setSaturation(int newSaturation)
+{
+    if (m_saturation == newSaturation)
+        return;
+    m_saturation = newSaturation;
+    emit saturationChanged();
+}
+
+int CameraService::exposure() const
+{
+    return m_exposure;
+}
+
+void CameraService::setExposure(int newExposure)
+{
+    if (m_exposure == newExposure)
+        return;
+    m_exposure = newExposure;
+    emit exposureChanged();
+}
+
+int CameraService::grayScale() const
+{
+    return m_grayScale;
+}
+
+void CameraService::setGrayScale(int newGrayScale)
+{
+    if (m_grayScale == newGrayScale)
+        return;
+    m_grayScale = newGrayScale;
+    emit grayScaleChanged();
+}
+
+QImage CameraService::recentCaptured() const
+{
+    return m_recentCaptured;
+}
+
+void CameraService::setRecentCaptured(const QImage &newRecentCaptured)
+{
+    if (m_recentCaptured == newRecentCaptured)
+        return;
+    m_recentCaptured = newRecentCaptured;
+    emit recentCapturedChanged();
+}
+
+bool CameraService::capturingVideo() const
+{
+    return m_capturingVideo;
 }

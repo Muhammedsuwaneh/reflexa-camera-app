@@ -11,7 +11,9 @@ class CameraService : public QObject
 {
     Q_OBJECT
     Q_PROPERTY(QImage frame READ frame NOTIFY frameChanged)
+    Q_PROPERTY(QImage recentCaptured READ recentCaptured WRITE setRecentCaptured NOTIFY recentCapturedChanged)
     Q_PROPERTY(cv::Mat originalFrame READ originalFrame WRITE setOriginalFrame NOTIFY originalFrameChanged)
+    Q_PROPERTY(cv::Mat processedFrame READ processedFrame WRITE setProcessedFrame NOTIFY processedFrameChanged)
 
     // CAM DEVICES
     Q_PROPERTY(QStringList cameraNames READ cameraNames NOTIFY camerasChanged)
@@ -24,6 +26,18 @@ class CameraService : public QObject
     // VIDEO QUALITY
     Q_PROPERTY(QStringList videoQualities READ videoQualities NOTIFY videoQualitiesChanged)
     Q_PROPERTY(int currentVideoQualityIndex READ currentVideoQualityIndex WRITE setCurrentVideoQualityIndex NOTIFY currentVideoQualityIndexChanged)
+
+    // TEXTURES
+    Q_PROPERTY(int brightness READ brightness WRITE setBrightness NOTIFY brightnessChanged)
+    Q_PROPERTY(int contrast READ contrast WRITE setContrast NOTIFY contrastChanged)
+    Q_PROPERTY(int saturation READ saturation WRITE setSaturation NOTIFY saturationChanged)
+    Q_PROPERTY(int exposure READ exposure WRITE setExposure NOTIFY exposureChanged)
+    Q_PROPERTY(int grayScale READ grayScale WRITE setGrayScale NOTIFY grayScaleChanged)
+
+    // FILTERS
+    Q_PROPERTY(QString activeFilter READ activeFilter WRITE setActiveFilter NOTIFY activeFilterChanged);
+
+    Q_PROPERTY(bool capturingVideo READ capturingVideo NOTIFY capturingVideoChanged)
 
 public:
     enum Mode {
@@ -49,6 +63,8 @@ public:
     void record();
     void scanQR();
 
+    void applyAdjustmentsAndFilters();
+
     void init();
 
     int currentCameraIndex() const;
@@ -73,6 +89,33 @@ public:
     void startCamera();
     void stopCamera();
 
+    int brightness() const;
+    void setBrightness(int newBrightness);
+
+    cv::Mat processedFrame() const;
+
+    void setProcessedFrame(const cv::Mat &newProcessedFrame);
+
+    QString activeFilter() const;
+    void setActiveFilter(const QString &newActiveFilter);
+
+    int contrast() const;
+    void setContrast(int newContrast);
+
+    int saturation() const;
+    void setSaturation(int newSaturation);
+
+    int exposure() const;
+    void setExposure(int newExposure);
+
+    int grayScale() const;
+    void setGrayScale(int newGrayScale);
+
+    QImage recentCaptured() const;
+
+    void setRecentCaptured(const QImage &newRecentCaptured);
+    bool capturingVideo() const;
+
 signals:
     void frameChanged();
     void frameCleared();
@@ -88,6 +131,24 @@ signals:
     void modeChanged();
 
     void originalFrameChanged();
+
+    void brightnessChanged();
+
+    void processedFrameChanged();
+
+    void activeFilterChanged();
+
+    void contrastChanged();
+
+    void saturationChanged();
+
+    void exposureChanged();
+
+    void grayScaleChanged();
+
+    void recentCapturedChanged();
+
+    void capturingVideoChanged();
 
 private:
     QImage m_frame;
@@ -111,6 +172,35 @@ private:
     cv::Mat m_originalFrame;
 
     std::atomic_bool running { false };
+
+    // TEXTURES & FILTERS
+    void applyLiveAdjustments();
+    void applyLiveFilters();
+
+    int m_brightness = 0;
+    int m_contrast   = 0;
+    int m_saturation = 100;
+    int m_exposure   = 0;
+    int m_grayScale  = 0;
+
+    cv::Mat m_processedFrame;
+
+    void adjustBrightness();
+    void adjustContrast();
+    void adjustSaturation();
+    void adjustExposure();
+    void adjustGrayScale();
+
+    void applyGrayScale();
+    void applyInvert();
+    void applyHighContrast();
+    void applyGaussianBlur();
+    void applySkinSmoothing();
+    void applySepia();
+
+    QString m_activeFilter = "";
+    QImage m_recentCaptured;
+    bool m_capturingVideo;
 };
 
 #endif // CAMERASERVICE_H

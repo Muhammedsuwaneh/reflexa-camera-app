@@ -59,6 +59,37 @@ Window {
                     }
                 }
             }
+
+            // FLASH
+            Rectangle {
+                id: flash
+                anchors.fill: parent
+                anchors.margins: 10
+                radius: 8
+                color: "#ffffff"
+                opacity: 0
+                visible: opacity > 0
+                z: 20
+
+                Behavior on opacity {
+                    NumberAnimation {
+                        duration: 300
+                        easing.type: Easing.OutQuad
+                    }
+                }
+
+                Timer {
+                    id: flashTimer
+                    interval: 300
+                    repeat: false
+                    onTriggered: flash.opacity = 0
+                }
+
+                function trigger() {
+                    flash.opacity = 1
+                    flashTimer.restart()
+                }
+            }
         }
 
         SettingsView {
@@ -153,6 +184,11 @@ Window {
             Layout.fillWidth: true
             Layout.preferredHeight: 100
             z: 20
+
+            onImageCaptured: {
+                flash.trigger()
+                console.log("captured")
+            }
         }
     }
 }

@@ -134,7 +134,7 @@ Rectangle {
                     Layout.fillWidth: true
 
                     onSliding: (value) => {
-                        ImageTextureController.adjustBrightness(root.value)
+                        ImageTextureController.adjustBrightness(value)
                     }
                 }
             }
@@ -159,7 +159,7 @@ Rectangle {
                     Layout.fillWidth: true
 
                     onSliding: (value) => {
-                        ImageTextureController.adjustContrast(root.value)
+                        ImageTextureController.adjustContrast(value)
                     }
                 }
             }
@@ -183,9 +183,10 @@ Rectangle {
                 {
                     Layout.topMargin: 5
                     Layout.fillWidth: true
+                    value: 100
 
                     onSliding: (value) => {
-                        ImageTextureController.adjustSaturation(root.value)
+                        ImageTextureController.adjustSaturation(value)
                     }
                 }
             }
@@ -211,7 +212,7 @@ Rectangle {
 
                     onSliding: (value) => {
                         console.log("sliding: " + value)
-                        ImageTextureController.adjustExposure(root.value)
+                        ImageTextureController.adjustExposure(value)
                     }
                 }
             }
@@ -237,7 +238,7 @@ Rectangle {
 
                     onSliding: (value) => {
                         console.log("sliding: " + value)
-                        ImageTextureController.adjustGrayScale(root.value)
+                        ImageTextureController.adjustGrayScale(value)
                     }
                 }
             }

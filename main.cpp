@@ -8,6 +8,7 @@
 #include "utilities/CameraControls.h"
 #include "controllers/ImageFiltersController.h"
 #include "controllers/ImageTextureController.h"
+#include "utilities/CapturedImageProvider.h"
 
 int main(int argc, char *argv[])
 {
@@ -37,7 +38,9 @@ int main(int argc, char *argv[])
 
     // providers
     CameraImageProvider* cameraProvider = new CameraImageProvider(&camera);
+    CapturedImageProvider* captureProvider = new CapturedImageProvider(&camera);
     engine.addImageProvider("camera", cameraProvider);
+    engine.addImageProvider("captured", captureProvider);
 
     // context
     engine.rootContext()->setContextProperty("Camera", &camera);

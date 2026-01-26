@@ -28,7 +28,7 @@ Rectangle {
 
                 Repeater
                 {
-                    model: ["Gray Scale", "Negative / Invert", "High Contrast", "Gaussian Blur", "Skin Smoothing", "Sepia (Warm)"]
+                    model: ["Gray Scale", "Negative / Invert", "High Contrast", "Gaussian Blur", "Skin Smoothing", "Sepia (Warm)", "Restore"]
 
                     Rectangle
                     {

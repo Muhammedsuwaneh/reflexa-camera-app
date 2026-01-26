@@ -18,7 +18,6 @@ void CameraControls::toggleHDR()
     this->m_hdrIsActive = !this->m_hdrIsActive;
 
     // call camera service
-    //this->m_camera->setHdr(this->m_hdrIsActive);
 
     emit hdrIsActiveChanged();
 }
@@ -26,7 +25,7 @@ void CameraControls::toggleHDR()
 void CameraControls::toggleFaceDetector()
 {
     this->m_faceDetectorIsActive = !this->m_faceDetectorIsActive;
-    //this->m_camera->setDetectingFace(this->m_faceDetectorIsActive);
+    this->m_camera->setDetectingFace(this->m_faceDetectorIsActive);
 
     emit faceDetectorIsActiveChanged();
 
@@ -110,7 +109,7 @@ void CameraControls::onCameraPressed()
 
 void CameraControls::onVideoPressed()
 {
-    if (m_videoButtonIsActive) this->m_camera->record();
+    if (this->m_videoButtonIsActive) this->m_camera->record();
     else activateVideo();
 }
 

@@ -46,7 +46,6 @@ public:
 
     bool showSettings() const;
     bool showFilters() const;
-
 signals:
     void hdrIsActiveChanged();
     void faceDetectorIsActiveChanged();
