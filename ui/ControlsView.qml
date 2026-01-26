@@ -10,10 +10,17 @@ Rectangle {
     height: 100
     width: parent.width
 
+
+    property real currentTimerIndex: -1
+    property var timers: [3, 5, 10]
+    property real selectedTimerValue: 3
+
     signal imageCaptured()
 
     signal startRecording()
     signal stopRecording()
+
+    signal timerClicked(int value)
 
     Rectangle {
         id: background
@@ -85,13 +92,63 @@ Rectangle {
                 visible: !Camera.capturingVideo
             }
 
-            CameraBehaviorButton {
-                iconSource: "../assets/timer.png"
-                isActive: cameraControls.timerIsActive
+            Item {
+                width: 60
+                height: 60
                 Layout.alignment: Qt.AlignVCenter
-                onClicked: cameraControls.toggleTimer()
-
                 visible: !Camera.capturingVideo
+
+                CameraBehaviorButton {
+                    id: timerButton
+                    anchors.centerIn: parent
+                    iconSource: "../assets/timer.png"
+                    isActive: cameraControls.timerIsActive
+
+                    onClicked:
+                    {
+                        if(currentTimerIndex == -1)
+                        {
+                            cameraControls.toggleTimer(); // make active
+                            root.currentTimerIndex++;
+                        }
+
+                        else if(root.currentTimerIndex > 2 && cameraControls.timerIsActive)
+                        {
+                            cameraControls.toggleTimer() // make inactive
+                            currentTimerIndex = 0;
+                        }
+                        else
+                        {
+                            root.currentTimerIndex++;
+                        }
+
+                        selectedTimerValue = root.timers[root.currentTimerIndex];
+                        root.timerClicked(selectedTimerValue);
+                        timerCounter.text = selectedTimerValue.toString()
+                    }
+                }
+
+                Rectangle {
+                    id: timerBadge
+                    width: 22
+                    height: 22
+                    radius: 8
+                    color: "#E53935"
+                    anchors.top: parent.top
+                    anchors.right: parent.right
+                    anchors.topMargin: -2
+                    anchors.rightMargin: -2
+                    z: 10
+
+                    Text {
+                        id: timerCounter
+                        anchors.centerIn: parent
+                        text: "0"
+                        color: "#ffffff"
+                        font.pixelSize: 11
+                        font.bold: true
+                    }
+                }
             }
 
             CameraControlButton {

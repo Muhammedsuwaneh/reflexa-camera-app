@@ -64,7 +64,7 @@ public:
     Q_INVOKABLE void applyVideoQuality(int index);
 
     void takeShot();
-    void record();
+    void startVideoCapture();
     void scanQR();
 
     void applyAdjustmentsAndFilters();
@@ -205,6 +205,8 @@ private:
     QString m_activeFilter = "";
     QImage m_recentCaptured;
     bool m_capturingVideo = false;
+
+    cv::VideoWriter writer;
 };
 
 #endif // CAMERASERVICE_H

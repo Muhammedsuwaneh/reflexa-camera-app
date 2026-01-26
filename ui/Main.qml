@@ -9,6 +9,9 @@ Window {
     flags: Qt.FramelessWindowHint | Qt.Window
     color: "transparent"
 
+    property real countDownTime: 0
+    property int currentCount: 0
+
     GridLayout {
         rows: 3
         columns: 3
@@ -59,6 +62,49 @@ Window {
                     }
                 }
             }
+
+
+            Item {
+                id: countdownOverlay
+                z: 20
+                visible: false
+                anchors.centerIn: parent
+
+                Timer {
+                    id: countDownTimer
+                    interval: 1000
+                    repeat: true
+
+                    onTriggered: {
+                        currentCount--
+
+                        timeText.text = currentCount.toString()
+
+                        if (currentCount <= 0) {
+                            stop()
+                            countdownOverlay.visible = false
+                            flash.trigger()
+                        }
+                    }
+                }
+
+                function trigger() {
+                    currentCount = countDownTime
+                    timeText.text = currentCount.toString()
+                    visible = true
+                    countDownTimer.start()
+                }
+
+                Text {
+                    id: timeText
+                    text: currentCount.toString()
+                    font.pixelSize: 150
+                    font.bold: true
+                    color: "#ffffff"
+                    anchors.centerIn: parent
+                }
+            }
+
 
             // FLASH
             Rectangle {
@@ -127,7 +173,8 @@ Window {
                 target: Camera
                 onCapturingVideoChanged:
                 {
-                    recordTimer.opacity = Camera.capturingVideo ? 1 : 0
+                    if(countDownTime == 0)
+                        recordTimer.opacity = Camera.capturingVideo ? 1 : 0
                 }
             }
 
@@ -189,7 +236,39 @@ Window {
             onStopRecording:  recordTimer.stop()
 
             onImageCaptured: {
-                flash.trigger()
+                if(countDownTime == 0)
+                    flash.trigger()
+                else
+                    countdownOverlay.trigger()
+            }
+
+            onTimerClicked: (value) =>
+            {
+                countDownTime = value
+            }
+        }
+    }
+
+    AnimatedImage
+    {
+        id: recordingSpinner
+        source: "../assets/recording.gif"
+        anchors.left: parent.left
+        anchors.top: parent.top
+        anchors.leftMargin: 30
+        anchors.topMargin: 80
+        width: 70
+        height: 50
+        playing: true
+
+        visible: false
+
+        Connections
+        {
+            target: Camera
+            onCapturingVideoChanged:
+            {
+                recordingSpinner.visible = Camera.capturingVideo
             }
         }
     }
@@ -220,6 +299,18 @@ Window {
             color: "#333"
             font.pixelSize: 12
             anchors.centerIn: parent
+        }
+
+
+        visible: true
+
+        Connections
+        {
+            target: Camera
+            onCapturingVideoChanged:
+            {
+                filtersButton.visible = !Camera.capturingVideo
+            }
         }
 
         MouseArea {

@@ -100,6 +100,11 @@ void CameraService::processFrame()
         this->faceDetector.detect(this->m_processedFrame);
     }
 
+    if (this->m_capturingVideo && this->writer.isOpened())
+    {
+        writer.write(this->m_processedFrame); // capture frame / record video
+    }
+
     applyLiveAdjustments();
     applyLiveFilters();
 
@@ -466,7 +471,7 @@ void CameraService::takeShot()
     }
 }
 
-void CameraService::record()
+void CameraService::startVideoCapture()
 {
     if(this->m_capturingVideo) return;
 

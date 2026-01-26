@@ -142,7 +142,7 @@ void CameraControls::onVideoPressed()
         return;
     }
 
-    this->m_camera->record();
+    this->m_camera->startVideoCapture();
 }
 
 void CameraControls::onQRPressed()
