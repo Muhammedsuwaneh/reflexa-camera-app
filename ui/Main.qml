@@ -77,6 +77,7 @@ Window {
 
 
         FiltersView {
+            id: filtersView
             Layout.row: 1
             Layout.column: 2
             Layout.fillHeight: true
@@ -89,14 +90,57 @@ Window {
                 target: cameraControls
                 onShowFiltersChanged:
                 {
-                    settingsView.opacity = cameraControls.showFilters ? 1 : 0
+                    filtersView.opacity = cameraControls.showFilters ? 1 : 0
                 }
             }
 
             Behavior on opacity { NumberAnimation { duration: 180; easing.type: Easing.OutCubic } }
         }
 
+        Button
+        {
+            id: filtersButton
+            width: 150
+            height: 28
+            flat: true
+            z: 30
+
+            anchors.right: parent.right
+            anchors.bottom: controlsView.top
+            anchors.rightMargin: 20
+            anchors.bottomMargin: 12
+
+            property color backgroundColor: "#808080"
+
+            background: Rectangle {
+                radius: 10
+                color: backgroundColor
+                opacity: buttonMouseArea.containsMouse ? 0.75 : 1
+            }
+
+            contentItem: Text {
+                text: "FILTERS"
+                color: "#333"
+                font.pixelSize: 12
+                anchors.centerIn: parent
+            }
+
+            MouseArea {
+                id: buttonMouseArea
+                anchors.fill: parent
+                hoverEnabled: true
+                cursorShape: Qt.PointingHandCursor
+
+                onClicked: cameraControls.toggleFilters()
+            }
+
+            Behavior on opacity {
+                NumberAnimation { duration: 150 }
+            }
+        }
+
         ControlsView {
+            id: controlsView
             Layout.row: 2
             Layout.columnSpan: 3
             Layout.fillWidth: true

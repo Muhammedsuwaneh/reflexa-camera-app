@@ -38,7 +38,7 @@ public:
     Q_INVOKABLE void toggleTimer();
     Q_INVOKABLE void toggleGrid();
     Q_INVOKABLE void toggleSettings();
-    Q_INVOKABLE void toggleFilter();
+    Q_INVOKABLE void toggleFilters();
 
     Q_INVOKABLE void onCameraPressed();
     Q_INVOKABLE void onVideoPressed();

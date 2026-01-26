@@ -51,7 +51,7 @@ void CameraControls::toggleSettings()
     emit showSettingsChanged();
 }
 
-void CameraControls::toggleFilter()
+void CameraControls::toggleFilters()
 {
     this->m_showFilters = !this->m_showFilters;
     emit showFiltersChanged();

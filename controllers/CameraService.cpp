@@ -64,7 +64,7 @@ void CameraService::startCamera()
 
     setDetectingFace(false);
 
-    getCaptureData();
+    //getCaptureData();
 
     setCurrentQualityIndex(m_currentQualityIndex);
     this->running = true;
