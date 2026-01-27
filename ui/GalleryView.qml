@@ -1,7 +1,7 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
-//import QtMultimedia - https://doc.qt.io/qt-6/qmediaplayer.html
+import QtMultimedia  //https://doc.qt.io/qt-6/qmediaplayer.html
 
 Item {
     id: root
