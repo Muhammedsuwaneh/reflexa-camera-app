@@ -6,6 +6,9 @@ This project is a feature-rich camera and media application built with Qt 6, QML
 
 The application provides a complete capture-to-playback workflow, combining real-time camera control, image processing, video recording, and media browsing in a clean, touch-friendly UI.
 
+
+![Screenshot](screenshots/Main.png)
+
 ### Key Features
 
 ### Camera & Capture
@@ -64,6 +67,65 @@ Filters applied using OpenCV for performance and flexibility
 - Image processing
 - Filters
 - Face detection
+
+### Setup & Build
+### Prerequisites
+
+Make sure the following tools and dependencies are installed:
+
+- Qt 6.x
+- Qt Quick
+- Qt Multimedia
+- Qt Creator
+- C++ Compiler
+- MSVC (Windows) or GCC/Clang (Linux)
+- OpenCV
+
+Built with the same compiler as Qt
+
+CMake or qmake (depending on project configuration)
+
+```bash
+git clone https://github.com/Muhammedsuwaneh/reflexa-camera-app.git
+cd reflexa-camera-app
+```
+
+- Open the Project
+- Launch Qt Creator
+
+Open the project using:
+
+CMakeLists.txt or
+
+.pro file
+
+Configure the kit (Desktop Qt 6)
+
+Configure OpenCV
+
+Ensure OpenCV is properly linked:
+
+OpenCV include and library paths must match your Qt compiler
+
+For CMake:
+
+```bash
+find_package(OpenCV REQUIRED)
+target_link_libraries(your_target PRIVATE ${OpenCV_LIBS})
+```
+
+For qmake:
+
+
+```bash
+INCLUDEPATH += path/to/opencv/include
+LIBS += -Lpath/to/opencv/lib -lopencv_core -lopencv_imgproc -lopencv_objdetect
+```
+
+Build & Run
+Select Debug or Release
+Build the project
+Run from Qt Creator
 
 ### Architecture Overview
 
