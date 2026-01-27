@@ -15,6 +15,7 @@ Rectangle {
     {
         anchors.fill: parent
         color: "#111111"
+        visible: root.opacity > 0
 
         ColumnLayout
         {

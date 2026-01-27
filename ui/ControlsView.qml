@@ -10,7 +10,6 @@ Rectangle {
     height: 100
     width: parent.width
 
-
     property real currentTimerIndex: -1
     property var timers: [3, 5, 10]
     property real selectedTimerValue: 3
@@ -22,12 +21,15 @@ Rectangle {
 
     signal timerClicked(int value)
 
+    signal capturedClicked()
+
     Rectangle {
         id: background
         anchors.fill: parent
         anchors.topMargin: -5
         radius: 12
         color: "#0b1a2a"
+        visible: root.opacity > 0
 
         Rectangle {
             anchors.leftMargin: 30
@@ -284,6 +286,17 @@ Rectangle {
                     function onRecentCapturedChanged() {
                         recentPhotoView.source = "image://captured/current?" + Date.now()
                     }
+                }
+            }
+
+            MouseArea
+            {
+                anchors.fill: parent
+                cursorShape: Qt.PointingHandCursor
+                onClicked:
+                {
+                    // show gallery
+                    root.capturedClicked()
                 }
             }
         }

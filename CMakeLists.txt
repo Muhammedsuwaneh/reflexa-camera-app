@@ -49,6 +49,8 @@ qt_add_qml_module(appreflexaCameraApp
         assets/recording.gif
         assets/play.png
         assets/pause.png
+        assets/arrow_left.png
+        assets/arrow_right.png
         assets/filter_images/1.jpg
         QML_FILES ui/TitleBar.qml
         QML_FILES ui/ControlButton.qml
@@ -69,6 +71,8 @@ qt_add_qml_module(appreflexaCameraApp
         models/res10_300x300_ssd_iter_140000.caffemodel
         models/deploy.prototxt
         QML_FILES ui/GridLines.qml
+        QML_FILES
+        QML_FILES ui/GalleryView.qml
 
 )
 

@@ -31,12 +31,13 @@ Window {
         }
 
         Rectangle {
+            id: captureContainer
             Layout.row: 1
             Layout.columnSpan: 3
             Layout.fillWidth: true
             Layout.fillHeight: true
             color: "#000"
-            z: 0
+            z: 10
 
             Image {
                 id: cameraView
@@ -66,7 +67,6 @@ Window {
                     }
                 }
             }
-
 
             Item {
                 id: countdownOverlay
@@ -220,7 +220,7 @@ Window {
             Layout.column: 2
             Layout.fillHeight: true
             Layout.preferredWidth: 350
-            z: 10
+            z: 20
             opacity: 0
 
             Connections
@@ -282,6 +282,52 @@ Window {
             {
                 countDownTime = value
             }
+
+            onCapturedClicked: () =>
+            {
+                if(!recordingSpinner.visible)
+                {
+                    // show gallery control buttons
+                    controlsView.opacity = 0
+                    captureContainer.opacity = 0
+                    galleryView.opacity = 1
+                    settingsView.opacity = 0
+                    filtersView.opacity = 0
+                    filtersButton.opacity = 0
+                }
+            }
+        }
+    }
+
+
+    GalleryView {
+        id: galleryView
+
+        anchors {
+            top: parent.top
+            topMargin: 45
+            left: parent.left
+            right: parent.right
+            bottom: parent.bottom
+        }
+
+        z: 120
+        opacity: 0
+        visible: opacity > 0
+
+        Behavior on opacity {
+            NumberAnimation {
+                duration: 200
+                easing.type: Easing.OutCubic
+            }
+        }
+
+        onReturnClicked:
+        {
+            controlsView.opacity = 1
+            captureContainer.opacity = 1
+            galleryView.opacity = 0
+            filtersButton.opacity = 1
         }
     }
 
