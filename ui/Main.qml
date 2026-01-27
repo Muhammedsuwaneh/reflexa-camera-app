@@ -12,6 +12,10 @@ Window {
     property real countDownTime: 0
     property int currentCount: 0
 
+    property bool pendingPhoto: false
+    property bool pendingVideo: false
+
+
     GridLayout {
         rows: 3
         columns: 3
@@ -78,26 +82,34 @@ Window {
                     onTriggered: {
                         currentCount--
 
-                        timeText.text = currentCount.toString()
-
                         if (currentCount <= 0) {
                             stop()
                             countdownOverlay.visible = false
-                            flash.trigger()
+
+                            if (pendingPhoto) {
+                                flash.trigger()
+                                Camera.takeShot()
+                            }
+
+                            if (pendingVideo) {
+                                Camera.startVideoCapture()
+                                recordTimer.start()
+                            }
+
+                            pendingPhoto = false
+                            pendingVideo = false
                         }
                     }
                 }
 
-                function trigger() {
-                    currentCount = countDownTime
-                    timeText.text = currentCount.toString()
+                function startCountdown(seconds) {
+                    currentCount = seconds
                     visible = true
                     countDownTimer.start()
                 }
 
                 Text {
-                    id: timeText
-                    text: currentCount.toString()
+                    text: currentCount
                     font.pixelSize: 150
                     font.bold: true
                     color: "#ffffff"
@@ -173,8 +185,7 @@ Window {
                 target: Camera
                 onCapturingVideoChanged:
                 {
-                    if(countDownTime == 0)
-                        recordTimer.opacity = Camera.capturingVideo ? 1 : 0
+                    recordTimer.opacity = Camera.capturingVideo ? 1 : 0
                 }
             }
 
@@ -232,14 +243,29 @@ Window {
             Layout.preferredHeight: 100
             z: 20
 
-            onStartRecording: recordTimer.start()
-            onStopRecording:  recordTimer.stop()
+            onStartRecording: {
+                if (countDownTime > 0) {
+                    pendingVideo = true
+                    countdownOverlay.startCountdown(countDownTime)
+                } else {
+                    Camera.startVideoCapture()
+                    recordTimer.start()
+                }
+            }
+
+            onStopRecording:
+            {
+                recordTimer.stop()
+            }
 
             onImageCaptured: {
-                if(countDownTime == 0)
+                if (countDownTime > 0) {
+                    pendingPhoto = true
+                    countdownOverlay.startCountdown(countDownTime)
+                } else {
                     flash.trigger()
-                else
-                    countdownOverlay.trigger()
+                    Camera.takeShot()
+                }
             }
 
             onTimerClicked: (value) =>
@@ -257,8 +283,8 @@ Window {
         anchors.top: parent.top
         anchors.leftMargin: 30
         anchors.topMargin: 80
-        width: 70
-        height: 50
+        width: 50
+        height: 40
         playing: true
 
         visible: false

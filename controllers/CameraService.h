@@ -63,9 +63,9 @@ public:
     Q_INVOKABLE void applyPhotoQuality(int index);
     Q_INVOKABLE void applyVideoQuality(int index);
 
-    void takeShot();
-    void startVideoCapture();
-    void scanQR();
+    Q_INVOKABLE void takeShot();
+    Q_INVOKABLE void startVideoCapture();
+    Q_INVOKABLE void scanQR();
 
     void applyAdjustmentsAndFilters();
 

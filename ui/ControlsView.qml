@@ -106,20 +106,20 @@ Rectangle {
 
                     onClicked:
                     {
-                        if(currentTimerIndex == -1)
+                        if (currentTimerIndex === -1)
                         {
-                            cameraControls.toggleTimer(); // make active
-                            root.currentTimerIndex++;
-                        }
-
-                        else if(root.currentTimerIndex > 2 && cameraControls.timerIsActive)
+                            cameraControls.toggleTimer()
+                            currentTimerIndex = 0
+                        } else if (currentTimerIndex >= timers.length - 1)
                         {
-                            cameraControls.toggleTimer() // make inactive
-                            currentTimerIndex = 0;
-                        }
-                        else
+                            cameraControls.toggleTimer()
+                            currentTimerIndex = -1
+                            selectedTimerValue = 0
+                            timerCounter.text = "0"
+                            return
+                        } else
                         {
-                            root.currentTimerIndex++;
+                            currentTimerIndex++
                         }
 
                         selectedTimerValue = root.timers[root.currentTimerIndex];
@@ -162,8 +162,10 @@ Rectangle {
                     {
                         root.imageCaptured()
                     }
+                    else {
 
-                    cameraControls.onCameraPressed()
+                        cameraControls.onCameraPressed()
+                    }
                 }
 
                 visible: !Camera.capturingVideo
@@ -175,11 +177,12 @@ Rectangle {
                 Layout.alignment: Qt.AlignVCenter
                 onClicked:
                 {
-                    cameraControls.onVideoPressed()
-
-                    if(Camera.capturingVideo)
+                    if(cameraControls.videoButtonIsActive)
                     {
                         root.startRecording();
+                    }
+                    else {
+                        cameraControls.onVideoPressed()
                     }
                 }
 
