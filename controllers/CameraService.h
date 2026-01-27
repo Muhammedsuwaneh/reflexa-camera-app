@@ -159,7 +159,7 @@ private:
     cv::VideoCapture cap;
 
     FaceDetector faceDetector;
-    bool detectingFace = false;
+    std::atomic<bool> detectingFace = false;
 
     QTimer timer;
 
@@ -204,7 +204,7 @@ private:
 
     QString m_activeFilter = "";
     QImage m_recentCaptured;
-    bool m_capturingVideo = false;
+    std::atomic<bool> m_capturingVideo = false;
 
     cv::VideoWriter writer;
 };
