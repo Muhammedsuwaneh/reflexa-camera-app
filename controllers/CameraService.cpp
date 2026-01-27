@@ -100,13 +100,14 @@ void CameraService::processFrame()
         this->faceDetector.detect(this->m_processedFrame);
     }
 
+    applyLiveAdjustments();
+    applyLiveFilters();
+
+
     if (this->m_capturingVideo && this->writer.isOpened())
     {
         writer.write(this->m_processedFrame); // capture frame / record video
     }
-
-    applyLiveAdjustments();
-    applyLiveFilters();
 
     this->m_frame = matToQImage(this->m_processedFrame);
 

@@ -7,11 +7,16 @@
 class FaceDetector
 {
 public:
-    explicit FaceDetector();
-    void detect(cv::Mat& frame);
+    FaceDetector();
+    void detect(cv::Mat &frame);
+
 private:
     cv::dnn::Net net;
     float confidenceThreshold = 0.6f;
+
+    int frameCounter = 0;
+    int detectEveryNFrames = 5;
+    std::vector<cv::Rect> lastFaces;
 };
 
 #endif // FACEDETECTOR_H

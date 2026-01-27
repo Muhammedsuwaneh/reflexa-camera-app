@@ -39,33 +39,55 @@ FaceDetector::FaceDetector()
 
 void FaceDetector::detect(cv::Mat &frame)
 {
-    if(frame.empty()) return;
+    if (frame.empty())
+        return;
 
-    cv::Mat blob = cv::dnn::blobFromImage(frame, 1.0, cv::Size(300, 300), cv::Scalar(104, 177, 123), false, false);
+    frameCounter++;
 
-    net.setInput(blob);
-
-    cv::Mat detections = net.forward();
-
-    const int h = frame.rows;
-    const int w = frame.cols;
-
-    for(int iter = 0; iter < detections.size[2]; iter++)
+    if (frameCounter % detectEveryNFrames == 0)
     {
-        const float* data = detections.ptr<float>(0, 0, iter);
+        lastFaces.clear();
 
-        float confidence = data[2];
+        cv::Mat blob = cv::dnn::blobFromImage(
+            frame,
+            1.0,
+            cv::Size(300, 300),
+            cv::Scalar(104, 177, 123),
+            false,
+            false
+            );
 
-        if(confidence > confidenceThreshold)
+        net.setInput(blob);
+        cv::Mat detections = net.forward();
+
+        const int h = frame.rows;
+        const int w = frame.cols;
+
+        for (int i = 0; i < detections.size[2]; i++)
         {
-            int x1 = static_cast<int>(data[3] * w);
-            int y1 = static_cast<int>(data[4] * h);
-            int x2 = static_cast<int>(data[5] * w);
-            int y2 = static_cast<int>(data[6] * h);
+            const float* data = detections.ptr<float>(0, 0, i);
+            float confidence = data[2];
 
-            cv::rectangle(frame, cv::Point(x1, y1), cv::Point(x2, y2), cv::Scalar(0, 255, 0), 2); // draw green boxes around detections
+            if (confidence > confidenceThreshold)
+            {
+                int x1 = static_cast<int>(data[3] * w);
+                int y1 = static_cast<int>(data[4] * h);
+                int x2 = static_cast<int>(data[5] * w);
+                int y2 = static_cast<int>(data[6] * h);
 
-            cv::putText(frame, "", cv::Point(x1, y1 - 10), cv::FONT_HERSHEY_SIMPLEX, 0.6, cv::Scalar(0, 255, 0), 2);
+                lastFaces.emplace_back(
+                    cv::Rect(
+                        cv::Point(x1, y1),
+                        cv::Point(x2, y2)
+                        )
+                    );
+            }
         }
     }
+
+    for (const auto& face : lastFaces)
+    {
+        cv::rectangle(frame, face, cv::Scalar(0, 255, 0), 2);
+    }
 }
+

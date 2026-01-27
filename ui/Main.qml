@@ -251,6 +251,16 @@ Window {
                     Camera.startVideoCapture()
                     recordTimer.start()
                 }
+
+                if(cameraControls.showFilters)
+                {
+                    cameraControls.toggleFilters()
+                }
+
+                if(cameraControls.showSettings)
+                {
+                    cameraControls.toggleSettings()
+                }
             }
 
             onStopRecording:
