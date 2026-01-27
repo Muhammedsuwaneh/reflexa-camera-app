@@ -52,7 +52,7 @@ Rectangle {
                         }
 
                         Image {
-                            source: "../assets/filter_images/1.jpg"
+                            source: "../assets/filter_images/" + root.getImageName(index) + ".jpg"
                             opacity: buttonMouseArea.containsMouse ? 0.8 : 1
 
                             Layout.preferredHeight: 70
@@ -77,5 +77,10 @@ Rectangle {
                 }
             }
         }
+    }
+
+    function getImageName(index)
+    {
+        return index + 1
     }
 }

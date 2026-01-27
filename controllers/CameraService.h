@@ -37,6 +37,7 @@ class CameraService : public QObject
 
     // FILTERS
     Q_PROPERTY(QString activeFilter READ activeFilter WRITE setActiveFilter NOTIFY activeFilterChanged)
+    Q_PROPERTY(QString currentMediaType READ currentMediaType NOTIFY currentMediaTypeChanged)
 
     Q_PROPERTY(bool capturingVideo READ capturingVideo NOTIFY capturingVideoChanged)
 
@@ -120,6 +121,8 @@ public:
     void setRecentCaptured(const QImage &newRecentCaptured);
     bool capturingVideo() const;
 
+    QString currentMediaType() const;
+
 signals:
     void frameChanged();
     void frameCleared();
@@ -153,6 +156,8 @@ signals:
     void recentCapturedChanged();
 
     void capturingVideoChanged();
+
+    void currentMediaTypeChanged();
 
 private:
     QImage m_frame;
@@ -207,6 +212,7 @@ private:
     std::atomic<bool> m_capturingVideo {false};
 
     cv::VideoWriter writer;
+    QString m_currentMediaType = "photo";
 };
 
 #endif // CAMERASERVICE_H

@@ -8,7 +8,7 @@ Item {
 
     signal returnClicked()
 
-    property string mediaType: "photo"
+    property string mediaType: Camera.currentMediaType
 
     property real zoomFactor: 1.0
     property real minZoom: 0.6
@@ -157,7 +157,7 @@ Item {
         anchors.bottomMargin: 50
 
         width: 300
-        height: 50
+        height: 60
         radius: 20
         color: "#F9FAFB"
         opacity: 0.85
