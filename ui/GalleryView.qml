@@ -1,7 +1,7 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
-import QtMultimedia  //https://doc.qt.io/qt-6/qmediaplayer.html
+import QtMultimedia
 
 Item {
     id: root
@@ -18,21 +18,21 @@ Item {
     property real rotationAngle: 0
 
     Connections {
-        target: Camera
+        target: CameraController
         function onCurrentMediaTypeChanged()
         {
-            root.mediaType = Camera.currentMediaType
+            root.mediaType = CameraController.currentMediaType
 
             if (root.mediaType === "photo") {
                 player.stop()
             }
 
-            console.log("captured: " + Camera.currentMediaType)
+            console.log("captured: " + CameraController.currentMediaType)
         }
 
         function onRecentCapturedChanged()
         {
-            if (Camera.recentCaptured !== null)
+            if (CameraController.recentCaptured !== null)
             {
                 root.mediaExist = true
 
@@ -40,12 +40,8 @@ Item {
                 {
                     recentPhoto.source = "image://captured/current?" + Date.now()
                 }
-                else
-                {
-                    player.play()
-                }
 
-                console.log("captured: " + Camera.currentMediaType)
+                console.log("captured: " + CameraController.currentMediaType)
             }
         }
     }
@@ -95,7 +91,14 @@ Item {
         VideoOutput {
             id: videoOutput
             anchors.fill: parent
-            anchors.margins: 10
+            anchors
+            {
+                leftMargin: 60
+                rightMargin: 60
+                topMargin: 20
+                bottomMargin: 20
+            }
+
             opacity: root.mediaType === "photo" ? 0 : 1
 
             Behavior on opacity {

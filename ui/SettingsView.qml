@@ -35,11 +35,11 @@ Rectangle {
 
                 CustomComboBox {
                     Layout.fillWidth: true
-                    model: Camera.cameraNames
-                    currentIndex: Camera.currentCameraIndex
+                    model: CameraController.cameraNames
+                    currentIndex: CameraController.currentCameraIndex
 
                     onActivated: (index) => {
-                        Camera.switchCam(index)
+                        CameraController.switchCam(index)
                     }
                 }
             }
@@ -59,11 +59,11 @@ Rectangle {
 
                 CustomComboBox {
                     Layout.fillWidth: true
-                    model: Camera.camQualities
-                    currentIndex: Camera.currentQualityIndex
+                    model: CameraController.camQualities
+                    currentIndex: CameraController.currentQualityIndex
 
                     onActivated: (index) => {
-                        Camera.applyPhotoQuality(index)
+                        CameraController.applyPhotoQuality(index)
                     }
                 }
             }
@@ -83,11 +83,11 @@ Rectangle {
 
                 CustomComboBox {
                     Layout.fillWidth: true
-                    model: Camera.videoQualities
-                    currentIndex: Camera.currentVideoQualityIndex
+                    model: CameraController.videoQualities
+                    currentIndex: CameraController.currentVideoQualityIndex
 
                     onActivated: (index) => {
-                        Camera.applyVideoQuality(index)
+                        CameraController.applyVideoQuality(index)
                     }
                 }
             }

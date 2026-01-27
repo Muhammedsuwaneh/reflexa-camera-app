@@ -56,7 +56,7 @@ Window {
                             }
 
                 Connections {
-                    target: Camera
+                    target: CameraController
 
                     function onFrameCleared() {
                         cameraView.source = ""
@@ -88,11 +88,11 @@ Window {
 
                             if (pendingPhoto) {
                                 flash.trigger()
-                                Camera.takeShot()
+                                CameraController.takeShot()
                             }
 
                             if (pendingVideo) {
-                                Camera.startVideoCapture()
+                                CameraController.startVideoCapture()
                                 recordTimer.start()
                             }
 
@@ -182,10 +182,10 @@ Window {
 
             Connections
             {
-                target: Camera
+                target: CameraController
                 onCapturingVideoChanged:
                 {
-                    recordTimer.opacity = Camera.capturingVideo ? 1 : 0
+                    recordTimer.opacity = CameraController.capturingVideo ? 1 : 0
                 }
             }
 
@@ -248,7 +248,7 @@ Window {
                     pendingVideo = true
                     countdownOverlay.startCountdown(countDownTime)
                 } else {
-                    Camera.startVideoCapture()
+                    CameraController.startVideoCapture()
                     recordTimer.start()
                 }
 
@@ -274,7 +274,7 @@ Window {
                     countdownOverlay.startCountdown(countDownTime)
                 } else {
                     flash.trigger()
-                    Camera.takeShot()
+                    CameraController.takeShot()
                 }
             }
 
@@ -347,10 +347,10 @@ Window {
 
         Connections
         {
-            target: Camera
+            target: CameraController
             onCapturingVideoChanged:
             {
-                recordingSpinner.visible = Camera.capturingVideo
+                recordingSpinner.visible = CameraController.capturingVideo
             }
         }
     }
@@ -388,10 +388,10 @@ Window {
 
         Connections
         {
-            target: Camera
+            target: CameraController
             onCapturingVideoChanged:
             {
-                filtersButton.visible = !Camera.capturingVideo
+                filtersButton.visible = !CameraController.capturingVideo
             }
         }
 

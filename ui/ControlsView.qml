@@ -43,7 +43,7 @@ Rectangle {
             antialiasing: true
             color: "transparent"
 
-            visible: !Camera.capturingVideo
+            visible: !CameraController.capturingVideo
 
             Rectangle {
                 anchors.centerIn: parent
@@ -82,7 +82,7 @@ Rectangle {
                 Layout.alignment: Qt.AlignVCenter
                 onClicked: cameraControls.toggleFaceDetector()
 
-                visible: !Camera.capturingVideo
+                visible: !CameraController.capturingVideo
             }
 
             CameraBehaviorButton {
@@ -91,14 +91,14 @@ Rectangle {
                 Layout.alignment: Qt.AlignVCenter
                 onClicked: cameraControls.toggleHDR()
 
-                visible: !Camera.capturingVideo
+                visible: !CameraController.capturingVideo
             }
 
             Item {
                 width: 60
                 height: 60
                 Layout.alignment: Qt.AlignVCenter
-                visible: !Camera.capturingVideo
+                visible: !CameraController.capturingVideo
 
                 CameraBehaviorButton {
                     id: timerButton
@@ -170,7 +170,7 @@ Rectangle {
                     }
                 }
 
-                visible: !Camera.capturingVideo
+                visible: !CameraController.capturingVideo
             }
 
             CameraControlButton {
@@ -188,7 +188,7 @@ Rectangle {
                     }
                 }
 
-                visible: !Camera.capturingVideo
+                visible: !CameraController.capturingVideo
             }
 
             CameraControlButton {
@@ -197,7 +197,7 @@ Rectangle {
                 Layout.alignment: Qt.AlignVCenter
                 onClicked: cameraControls.onQRPressed()
 
-                visible: !Camera.capturingVideo
+                visible: !CameraController.capturingVideo
             }
 
             CameraBehaviorButton {
@@ -206,7 +206,7 @@ Rectangle {
                 Layout.alignment: Qt.AlignVCenter
                 onClicked: cameraControls.toggleGrid()
 
-                visible: !Camera.capturingVideo
+                visible: !CameraController.capturingVideo
             }
         }
 
@@ -217,9 +217,9 @@ Rectangle {
             isActive: false
             iconSource: "../assets/play.png"
 
-            visible: Camera.capturingVideo && Camera.pauseCapture
+            visible: CameraController.capturingVideo && CameraController.pauseCapture
 
-            onClicked: Camera.continueCapture()
+            onClicked: CameraController.continueCapture()
         }
 
         CameraControlButton {
@@ -228,9 +228,9 @@ Rectangle {
             isActive: false
             iconSource: "../assets/pause.png"
 
-            visible: Camera.capturingVideo && !Camera.pauseCapture
+            visible: CameraController.capturingVideo && !CameraController.pauseCapture
 
-            onClicked: Camera.pauseCapturing()
+            onClicked: CameraController.pauseCapturing()
         }
 
         CameraControlButton {
@@ -241,7 +241,7 @@ Rectangle {
             Layout.alignment: Qt.AlignVCenter
             onClicked:
             {
-                Camera.stopVideoCapture();
+                CameraController.stopVideoCapture();
                 root.stopRecording();
             }
 
@@ -249,10 +249,10 @@ Rectangle {
 
             Connections
             {
-                target: Camera
+                target: CameraController
                 onCapturingVideoChanged:
                 {
-                    stopButton.visible = Camera.capturingVideo
+                    stopButton.visible = CameraController.capturingVideo
                 }
             }
         }
@@ -269,7 +269,7 @@ Rectangle {
             border.width: 2
             antialiasing: true
             color: "#18181B"
-            opacity: Camera.capturingVideo ? 0 : 1
+            opacity: CameraController.capturingVideo ? 0 : 1
 
             Image
             {
@@ -281,7 +281,7 @@ Rectangle {
                 source: "image://captured/current"
 
                 Connections {
-                    target: Camera
+                    target: CameraController
                     function onRecentCapturedChanged() {
                         recentPhotoView.source = "image://captured/current?" + Date.now()
                     }

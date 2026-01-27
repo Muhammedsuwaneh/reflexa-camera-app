@@ -43,7 +43,7 @@ int main(int argc, char *argv[])
     engine.addImageProvider("captured", captureProvider);
 
     // context
-    engine.rootContext()->setContextProperty("Camera", &camera);
+    engine.rootContext()->setContextProperty("CameraController", &camera);
     engine.rootContext()->setContextProperty("cameraControls", cameraControls);
     engine.rootContext()->setContextProperty("WindowController", &windowController);
     engine.rootContext()->setContextProperty("ImageFiltersController", filterController);
