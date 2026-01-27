@@ -1,10 +1,21 @@
 import QtQuick
+import QtQuick.Controls
+import QtQuick.Layouts
 
 Item {
     id: root
     clip: true
 
     signal returnClicked()
+
+    property string mediaType: "photo"
+
+    property real zoomFactor: 1.0
+    property real minZoom: 0.6
+    property real maxZoom: 3.0
+
+    property real rotationAngle: 0
+
 
     Rectangle {
         id: roundedBackground
@@ -27,11 +38,33 @@ Item {
             cache: false
             opacity: 0
 
+            transform: [
+                Scale {
+                    origin.x: recentPhoto.width / 2
+                    origin.y: recentPhoto.height / 2
+                    xScale: zoomFactor
+                    yScale: zoomFactor
+                },
+                Rotation {
+                    origin.x: recentPhoto.width / 2
+                    origin.y: recentPhoto.height / 2
+                    angle: rotationAngle
+                }
+            ]
+
             Behavior on opacity {
                 NumberAnimation {
                     duration: 200
                     easing.type: Easing.OutCubic
                 }
+            }
+
+            Behavior on scale {
+                NumberAnimation { duration: 200; easing.type: Easing.OutCubic }
+            }
+
+            Behavior on rotation {
+                NumberAnimation { duration: 200; easing.type: Easing.OutCubic }
             }
 
             Connections {
@@ -50,10 +83,10 @@ Item {
     Image {
         anchors.bottom: parent.bottom
         anchors.left: parent.left
-        anchors.leftMargin: 20
-        anchors.bottomMargin: 15
-        width: 40
-        height: 35
+        anchors.leftMargin: 25
+        anchors.bottomMargin: 25
+        width: 50
+        height: 50
         source: "../assets/camera.png"
         fillMode: Image.PreserveAspectFit
         smooth: true
@@ -127,9 +160,134 @@ Item {
         height: 50
         radius: 20
         color: "#F9FAFB"
-        opacity: .5
+        opacity: 0.85
 
         visible: recentPhoto.opacity > 0
+
+        RowLayout {
+            anchors.fill: parent
+            anchors.margins: 15
+            spacing: 30
+            layoutDirection: Qt.LeftToRight
+
+            Item { Layout.fillWidth: true } // spacer (left)
+
+            Image {
+                width: 22
+                height: 22
+                source: "../assets/delete.png"
+                fillMode: Image.PreserveAspectFit
+                smooth: true
+                Layout.alignment: Qt.AlignVCenter
+
+                MouseArea {
+                    anchors.fill: parent
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked:
+                    {
+                        console.log("Deleting from list and PC")
+                    }
+                }
+            }
+
+            Image {
+                width: 22
+                height: 22
+                source: "../assets/rotate.png"
+                fillMode: Image.PreserveAspectFit
+                smooth: true
+                Layout.alignment: Qt.AlignVCenter
+                visible: mediaType == "photo" ? true : false
+
+                MouseArea {
+                    anchors.fill: parent
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked:
+                    {
+                        rotationAngle = (rotationAngle + 90) % 360
+                    }
+                }
+            }
+
+            Image {
+                width: 22
+                height: 22
+                source: "../assets/zoom_in.png"
+                fillMode: Image.PreserveAspectFit
+                smooth: true
+                Layout.alignment: Qt.AlignVCenter
+                visible: mediaType == "photo" ? true : false
+
+                MouseArea {
+                    anchors.fill: parent
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked:
+                    {
+                        zoomFactor = Math.min(maxZoom, zoomFactor + 0.2)
+                    }
+                }
+            }
+
+
+            Image {
+                width: 22
+                height: 22
+                source: "../assets/zoom_out.png"
+                fillMode: Image.PreserveAspectFit
+                smooth: true
+                Layout.alignment: Qt.AlignVCenter
+                visible: mediaType == "photo" ? true : false
+
+                MouseArea {
+                    anchors.fill: parent
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked:
+                    {
+                        zoomFactor = Math.max(minZoom, zoomFactor - 0.2)
+                    }
+                }
+            }
+
+            Image {
+                width: 22
+                height: 22
+                source: "../assets/play.png"
+                fillMode: Image.PreserveAspectFit
+                smooth: true
+                Layout.alignment: Qt.AlignVCenter
+                visible: mediaType == "photo" ? false : true
+
+                MouseArea {
+                    anchors.fill: parent
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked:
+                    {
+                        console.log("Play")
+                    }
+                }
+            }
+
+            Image {
+                width: 22
+                height: 22
+                source: "../assets/pause.png"
+                fillMode: Image.PreserveAspectFit
+                smooth: true
+                Layout.alignment: Qt.AlignVCenter
+                visible: mediaType == "photo" ? false : true
+
+                MouseArea {
+                    anchors.fill: parent
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked:
+                    {
+                        console.log("Pause")
+                    }
+                }
+            }
+
+            Item { Layout.fillWidth: true } // spacer (right)
+        }
 
         Behavior on opacity {
             NumberAnimation { duration: 180 }
