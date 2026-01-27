@@ -351,6 +351,11 @@ void CameraService::getCaptureData()
             for (const QSize &size : photoSizes)
                 m_camQualities.push_back(formatPhotoQuality(size));
 
+            const QSize size = photoSizes[this->m_currentQualityIndex];
+
+            cap.set(cv::CAP_PROP_FRAME_WIDTH, size.width());
+            cap.set(cv::CAP_PROP_FRAME_HEIGHT, size.height());
+
             emit camQualitiesChanged();
             emit videoQualitiesChanged();
             emit camerasChanged();
