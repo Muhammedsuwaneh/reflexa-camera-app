@@ -478,29 +478,61 @@ void CameraService::takeShot()
 
 void CameraService::startVideoCapture()
 {
-    if(this->m_capturingVideo) return;
+    try
+    {
+        if(this->m_capturingVideo) return;
 
-    qDebug() << "Capturing video ....";
+        const int width = static_cast<int>(this->cap.get(cv::CAP_PROP_FRAME_WIDTH));
+        const int height = static_cast<int>(this->cap.get(cv::CAP_PROP_FRAME_HEIGHT));
+        const double fps = this->cap.get(cv::CAP_PROP_FPS) > 0 ? this->cap.get(cv::CAP_PROP_FPS) : 30;
 
-    this->m_capturingVideo = true;
-    emit capturingVideoChanged();
+        QString vidDir = QStandardPaths::writableLocation(QStandardPaths::MoviesLocation);
+
+        QDir dir(vidDir + "/ReflexaCamCaptures");
+        if (!dir.exists())
+            dir.mkpath(".");
+
+        QString filename =
+            dir.filePath("VID_" +
+                         QDateTime::currentDateTime().toString("yyyyMMdd_HHmmss") +
+                         ".avi");
+
+        writer.open(filename.toLocal8Bit().constData(), cv::VideoWriter::fourcc('M', 'J', 'P', 'G'), fps, cv::Size(width, height));
+
+        if(!writer.isOpened())
+        {
+            qDebug() << "Failed to start video writer";
+            return;
+        }
+
+        this->m_capturingVideo = true;
+        emit capturingVideoChanged();
+
+    }
+    catch (const std::exception &e)
+    {
+        qDebug() << e.what();
+    }
 }
 
 void CameraService::stopVideoCapture()
 {
-    if (!this->m_capturingVideo)
+    if (!m_capturingVideo)
         return;
 
-    this->m_capturingVideo = false;
+    m_capturingVideo = false;
 
-    /*if (m_videoWriter.isOpened())
-        m_videoWriter.release();*/
+    if (writer.isOpened())
+        writer.release();
 
+    setRecentCaptured(matToQImage(m_processedFrame.clone()));
     emit capturingVideoChanged();
-    qDebug() << "Recording stopped ...";
 }
 
-void CameraService::scanQR() { qDebug() << "Scanning QR ..."; }
+void CameraService::scanQR()
+{
+    qDebug() << "Scanning QR ...";
+}
 
 QStringList CameraService::cameraNames() const { return this->m_cameraNames; }
 

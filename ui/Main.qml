@@ -284,7 +284,7 @@ Window {
         anchors.leftMargin: 30
         anchors.topMargin: 80
         width: 50
-        height: 40
+        height: 30
         playing: true
 
         visible: false

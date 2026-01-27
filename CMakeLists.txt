@@ -47,6 +47,8 @@ qt_add_qml_module(appreflexaCameraApp
         assets/stop.png
         assets/dropdown.png
         assets/recording.gif
+        assets/play.png
+        assets/pause.png
         assets/filter_images/1.jpg
         QML_FILES ui/TitleBar.qml
         QML_FILES ui/ControlButton.qml
