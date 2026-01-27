@@ -282,7 +282,6 @@ Rectangle {
 
                 Connections {
                     target: Camera
-
                     function onRecentCapturedChanged() {
                         recentPhotoView.source = "image://captured/current?" + Date.now()
                     }

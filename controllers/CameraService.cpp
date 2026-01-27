@@ -470,7 +470,7 @@ void CameraService::takeShot()
     if (success)
     {
         setRecentCaptured(matToQImage(frameToSave));
-        m_currentMediaType = "photo";
+        this->m_currentMediaType = "photo";
         emit currentMediaTypeChanged();
     }
     else
@@ -528,11 +528,10 @@ void CameraService::stopVideoCapture()
     if (writer.isOpened())
         writer.release();
 
-    m_currentMediaType = "video";
-    emit currentMediaTypeChanged();
-
+    this->m_currentMediaType = "video";
     setRecentCaptured(matToQImage(m_processedFrame.clone()));
     emit capturingVideoChanged();
+    emit currentMediaTypeChanged();
 }
 
 void CameraService::scanQR()

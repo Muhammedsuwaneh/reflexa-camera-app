@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
+//import QtMultimedia - https://doc.qt.io/qt-6/qmediaplayer.html
 
 Item {
     id: root
@@ -8,14 +9,46 @@ Item {
 
     signal returnClicked()
 
-    property string mediaType: Camera.currentMediaType
+    property string mediaType: "photo"
+    property bool mediaExist: false
 
     property real zoomFactor: 1.0
     property real minZoom: 0.6
     property real maxZoom: 3.0
-
     property real rotationAngle: 0
 
+    Connections {
+        target: Camera
+        function onCurrentMediaTypeChanged()
+        {
+            root.mediaType = Camera.currentMediaType
+
+            if (root.mediaType === "photo") {
+                player.stop()
+            }
+
+            console.log("captured: " + Camera.currentMediaType)
+        }
+
+        function onRecentCapturedChanged()
+        {
+            if (Camera.recentCaptured !== null)
+            {
+                root.mediaExist = true
+
+                if (root.mediaType === "photo")
+                {
+                    recentPhoto.source = "image://captured/current?" + Date.now()
+                }
+                else
+                {
+                    player.play()
+                }
+
+                console.log("captured: " + Camera.currentMediaType)
+            }
+        }
+    }
 
     Rectangle {
         id: roundedBackground
@@ -25,18 +58,13 @@ Item {
 
         Image {
             id: recentPhoto
-            anchors {
-                top: parent.top
-                left: parent.left
-                right: parent.right
-                bottom: parent.bottom
-                margins: 10
-            }
+            anchors.fill: parent
+            anchors.margins: 10
 
             fillMode: Image.PreserveAspectFit
             smooth: true
             cache: false
-            opacity: 0
+            opacity: mediaType === "photo" ? 1 : 0
 
             transform: [
                 Scale {
@@ -53,43 +81,52 @@ Item {
             ]
 
             Behavior on opacity {
-                NumberAnimation {
-                    duration: 200
-                    easing.type: Easing.OutCubic
-                }
-            }
-
-            Behavior on scale {
                 NumberAnimation { duration: 200; easing.type: Easing.OutCubic }
-            }
-
-            Behavior on rotation {
-                NumberAnimation { duration: 200; easing.type: Easing.OutCubic }
-            }
-
-            Connections {
-                target: Camera
-                function onRecentCapturedChanged() {
-                    if (Camera.recentCaptured !== null) {
-                        recentPhoto.source =
-                            "image://captured/current?" + Date.now()
-                        recentPhoto.opacity = 1
-                    }
-                }
             }
         }
+
+        MediaPlayer {
+            id: player
+            source: "../assets/test.mp4"
+            audioOutput: AudioOutput {}
+            videoOutput: videoOutput
+        }
+
+        VideoOutput {
+            id: videoOutput
+            anchors.fill: parent
+            anchors.margins: 10
+            opacity: root.mediaType === "photo" ? 0 : 1
+
+            Behavior on opacity {
+                NumberAnimation { duration: 200; easing.type: Easing.OutCubic }
+            }
+        }
+    }
+
+    Rectangle {
+        anchors.top: parent.top
+        width: parent.width
+        height: 20
+        color: "#000000"
+    }
+
+    Text {
+        anchors.centerIn: parent
+        text: "No media yet"
+        color: "#888"
+        font.pixelSize: 18
+        visible: root.mediaExist ? false : true
     }
 
     Image {
         anchors.bottom: parent.bottom
         anchors.left: parent.left
-        anchors.leftMargin: 25
-        anchors.bottomMargin: 25
+        anchors.margins: 25
         width: 50
         height: 50
         source: "../assets/camera.png"
         fillMode: Image.PreserveAspectFit
-        smooth: true
 
         MouseArea {
             anchors.fill: parent
@@ -105,9 +142,7 @@ Item {
         width: 40
         height: 40
         source: "../assets/arrow_left.png"
-        fillMode: Image.PreserveAspectFit
-        smooth: true
-        visible: recentPhoto.opacity !== 0
+        visible: root.mediaExist
 
         MouseArea {
             anchors.fill: parent
@@ -123,9 +158,7 @@ Item {
         width: 40
         height: 40
         source: "../assets/arrow_right.png"
-        fillMode: Image.PreserveAspectFit
-        smooth: true
-        visible: recentPhoto.opacity !== 0
+        visible: root.mediaExist
 
         MouseArea {
             anchors.fill: parent
@@ -133,22 +166,6 @@ Item {
             onClicked: console.log("Next media")
         }
     }
-
-    Text {
-        anchors.centerIn: parent
-        text: "No media yet"
-        color: "#888"
-        font.pixelSize: 18
-        visible: recentPhoto.opacity === 0
-    }
-
-    Rectangle {
-        anchors.top: parent.top
-        width: parent.width
-        height: 20
-        color: "#000000"
-    }
-
 
     Rectangle {
         id: galleryControls
@@ -161,32 +178,24 @@ Item {
         radius: 20
         color: "#F9FAFB"
         opacity: 0.85
-
-        visible: recentPhoto.opacity > 0
+        visible: mediaExist
 
         RowLayout {
             anchors.fill: parent
             anchors.margins: 15
             spacing: 30
-            layoutDirection: Qt.LeftToRight
 
-            Item { Layout.fillWidth: true } // spacer (left)
+            Item { Layout.fillWidth: true }
 
             Image {
                 width: 22
                 height: 22
                 source: "../assets/delete.png"
-                fillMode: Image.PreserveAspectFit
-                smooth: true
-                Layout.alignment: Qt.AlignVCenter
 
                 MouseArea {
                     anchors.fill: parent
                     cursorShape: Qt.PointingHandCursor
-                    onClicked:
-                    {
-                        console.log("Deleting from list and PC")
-                    }
+                    onClicked: console.log("Delete media")
                 }
             }
 
@@ -194,18 +203,12 @@ Item {
                 width: 22
                 height: 22
                 source: "../assets/rotate.png"
-                fillMode: Image.PreserveAspectFit
-                smooth: true
-                Layout.alignment: Qt.AlignVCenter
-                visible: mediaType == "photo" ? true : false
+                visible: root.mediaType === "photo"
 
                 MouseArea {
                     anchors.fill: parent
                     cursorShape: Qt.PointingHandCursor
-                    onClicked:
-                    {
-                        rotationAngle = (rotationAngle + 90) % 360
-                    }
+                    onClicked: rotationAngle = (rotationAngle + 90) % 360
                 }
             }
 
@@ -213,38 +216,25 @@ Item {
                 width: 22
                 height: 22
                 source: "../assets/zoom_in.png"
-                fillMode: Image.PreserveAspectFit
-                smooth: true
-                Layout.alignment: Qt.AlignVCenter
-                visible: mediaType == "photo" ? true : false
+                visible: root.mediaType === "photo"
 
                 MouseArea {
                     anchors.fill: parent
                     cursorShape: Qt.PointingHandCursor
-                    onClicked:
-                    {
-                        zoomFactor = Math.min(maxZoom, zoomFactor + 0.2)
-                    }
+                    onClicked: zoomFactor = Math.min(maxZoom, zoomFactor + 0.2)
                 }
             }
-
 
             Image {
                 width: 22
                 height: 22
                 source: "../assets/zoom_out.png"
-                fillMode: Image.PreserveAspectFit
-                smooth: true
-                Layout.alignment: Qt.AlignVCenter
-                visible: mediaType == "photo" ? true : false
+                visible: mediaType === "photo"
 
                 MouseArea {
                     anchors.fill: parent
                     cursorShape: Qt.PointingHandCursor
-                    onClicked:
-                    {
-                        zoomFactor = Math.max(minZoom, zoomFactor - 0.2)
-                    }
+                    onClicked: zoomFactor = Math.max(minZoom, zoomFactor - 0.2)
                 }
             }
 
@@ -252,18 +242,13 @@ Item {
                 width: 22
                 height: 22
                 source: "../assets/play.png"
-                fillMode: Image.PreserveAspectFit
-                smooth: true
-                Layout.alignment: Qt.AlignVCenter
-                visible: mediaType == "photo" ? false : true
+                visible: root.mediaType !== "photo" &&
+                         player.playbackState !== MediaPlayer.PlayingState
 
                 MouseArea {
                     anchors.fill: parent
                     cursorShape: Qt.PointingHandCursor
-                    onClicked:
-                    {
-                        console.log("Play")
-                    }
+                    onClicked: player.play()
                 }
             }
 
@@ -271,26 +256,24 @@ Item {
                 width: 22
                 height: 22
                 source: "../assets/pause.png"
-                fillMode: Image.PreserveAspectFit
-                smooth: true
-                Layout.alignment: Qt.AlignVCenter
-                visible: mediaType == "photo" ? false : true
+                visible: player.playbackState === MediaPlayer.PlayingState
 
                 MouseArea {
                     anchors.fill: parent
                     cursorShape: Qt.PointingHandCursor
-                    onClicked:
-                    {
-                        console.log("Pause")
-                    }
+                    onClicked: player.pause()
                 }
             }
 
-            Item { Layout.fillWidth: true } // spacer (right)
+            Item { Layout.fillWidth: true }
         }
+    }
 
-        Behavior on opacity {
-            NumberAnimation { duration: 180 }
-        }
+    Behavior on zoomFactor {
+        NumberAnimation { duration: 200; easing.type: Easing.OutCubic }
+    }
+
+    Behavior on rotationAngle {
+        NumberAnimation { duration: 200; easing.type: Easing.OutCubic }
     }
 }
