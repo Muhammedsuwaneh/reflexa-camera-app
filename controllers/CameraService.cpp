@@ -15,6 +15,7 @@
 CameraService::CameraService(QObject *parent)
     : QObject{parent}
 {
+    this->m_mediaModel = new MediaListModel(this);
     connect(&timer, &QTimer::timeout, this, &CameraService::processFrame, Qt::DirectConnection);
 }
 
@@ -39,6 +40,29 @@ inline QImage matToQImage(const cv::Mat& mat)
 
         default:
             return QImage();
+    }
+}
+
+void CameraService::printMediaItems()
+{
+    qDebug() << "Current media items : " << this->m_mediaModel->rowCount();
+
+    int count = this->m_mediaModel->rowCount();
+
+    if(count <= 0) return;
+
+    for (int row = 0; row < count; ++row)
+    {
+        QModelIndex index = m_mediaModel->index(row, 0);
+
+        QString filePath = m_mediaModel->data(index, MediaListModel::FilePathRole).toString();
+        QString type     = m_mediaModel->data(index, MediaListModel::TypeRole).toString();
+        QDateTime created= m_mediaModel->data(index, MediaListModel::CreatedAtRole).toDateTime();
+
+        qDebug() << "[" << row << "]"
+                 << "Type:" << type
+                 << "| Path:" << filePath
+                 << "| Created:" << created.toString(Qt::ISODate);
     }
 }
 
@@ -488,21 +512,22 @@ void CameraService::takeShot()
                          QDateTime::currentDateTime().toString("yyyyMMdd_HHmmss") +
                          ".jpg");
 
-        std::string path = fileName.toStdString();
-
         std::vector<int> params = {
             cv::IMWRITE_JPEG_QUALITY, 95
         };
 
         cv::Mat frameToSave = this->m_processedFrame.clone();
 
-        bool success = cv::imwrite(path, frameToSave, params);
+        bool success = cv::imwrite(fileName.toStdString(), frameToSave, params);
 
         if (success)
         {
             setRecentCaptured(matToQImage(frameToSave));
             this->m_currentMediaType = "photo";
             emit currentMediaTypeChanged();
+
+            this->m_mediaModel->addMedia(fileName, "photo");
+            printMediaItems();
         }
         else
         {
@@ -536,6 +561,8 @@ void CameraService::startVideoCapture()
                          QDateTime::currentDateTime().toString("yyyyMMdd_HHmmss") +
                          ".avi");
 
+        this->m_lastVideoPath = filename;
+
         writer.open(filename.toLocal8Bit().constData(), cv::VideoWriter::fourcc('M', 'J', 'P', 'G'), fps, cv::Size(width, height));
 
         if(!writer.isOpened())
@@ -546,7 +573,6 @@ void CameraService::startVideoCapture()
 
         this->m_capturingVideo = true;
         emit capturingVideoChanged();
-
     }
     catch (const std::exception &e)
     {
@@ -570,6 +596,9 @@ void CameraService::stopVideoCapture()
         setRecentCaptured(matToQImage(m_processedFrame.clone()));
         emit capturingVideoChanged();
         emit currentMediaTypeChanged();
+
+        this->m_mediaModel->addMedia(this->m_lastVideoPath, "video");
+        printMediaItems();
     }
     catch (const std::exception &e)
     {
@@ -818,4 +847,9 @@ QString CameraService::currentMediaType() const
 QString CameraService::qrDetected() const
 {
     return m_qrDetected;
+}
+
+MediaListModel *CameraService::mediaModel() const
+{
+    return m_mediaModel;
 }

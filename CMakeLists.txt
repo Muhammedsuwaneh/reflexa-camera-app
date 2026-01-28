@@ -52,6 +52,7 @@ qt_add_qml_module(appreflexaCameraApp
         assets/pause.png
         assets/arrow_left.png
         assets/arrow_right.png
+        assets/video_thumb.png
 
         assets/delete.png
         assets/zoom_out.png
@@ -90,6 +91,7 @@ qt_add_qml_module(appreflexaCameraApp
         QML_FILES ui/GalleryView.qml
         SOURCES utilities/QRDetector.h utilities/QRDetector.cpp
         SOURCES utilities/ClipboardHelper.h utilities/ClipboardHelper.cpp
+        SOURCES models/MediaListModel.h models/MediaListModel.cpp
 
 )
 

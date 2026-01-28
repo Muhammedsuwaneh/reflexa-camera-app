@@ -339,8 +339,8 @@ Window {
         anchors.top: parent.top
         anchors.leftMargin: 30
         anchors.topMargin: 80
-        width: 50
-        height: 30
+        width: 70
+        height: 50
         playing: true
 
         visible: false

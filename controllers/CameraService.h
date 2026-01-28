@@ -8,6 +8,7 @@
 #include <QTimer>
 #include "utilities/FaceDetector.h"
 #include "utilities/QRDetector.h"
+#include "models/MediaListModel.h"
 
 class CameraService : public QObject
 {
@@ -42,6 +43,8 @@ class CameraService : public QObject
     Q_PROPERTY(QString qrDetected READ qrDetected NOTIFY qrDetectedChanged)
 
     Q_PROPERTY(bool capturingVideo READ capturingVideo NOTIFY capturingVideoChanged)
+
+    Q_PROPERTY(MediaListModel* mediaModel READ mediaModel)
 
 public:
     enum Mode {
@@ -126,6 +129,8 @@ public:
     QString currentMediaType() const;
 
     QString qrDetected() const;
+
+    MediaListModel *mediaModel() const;
 
 signals:
     void frameChanged();
@@ -215,6 +220,10 @@ private:
     void applySkinSmoothing();
     void applySepia();
 
+    void printMediaItems();
+
+    QString m_lastVideoPath;
+
     QString m_activeFilter = "";
     QImage m_recentCaptured;
     std::atomic<bool> m_capturingVideo {false};
@@ -222,6 +231,7 @@ private:
     cv::VideoWriter writer;
     QString m_currentMediaType = "photo";
     QString m_qrDetected;
+    MediaListModel *m_mediaModel;
 };
 
 #endif // CAMERASERVICE_H

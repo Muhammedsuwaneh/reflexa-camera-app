@@ -7,8 +7,6 @@ Item {
     id: root
     clip: true
 
-    signal returnClicked()
-
     property string mediaType: "photo"
     property bool mediaExist: false
 
@@ -16,6 +14,10 @@ Item {
     property real minZoom: 0.6
     property real maxZoom: 3.0
     property real rotationAngle: 0
+
+    property int currentIndex: -1
+
+    signal returnClicked()
 
     Connections {
         target: CameraController
@@ -26,22 +28,27 @@ Item {
             if (root.mediaType === "photo") {
                 player.stop()
             }
-
-            console.log("captured: " + CameraController.currentMediaType)
         }
 
-        function onRecentCapturedChanged()
-        {
-            if (CameraController.recentCaptured !== null)
+        function onRecentCapturedChanged() {
+            if (!CameraController.mediaModel || CameraController.mediaModel.count === 0)
+                return
+
+            currentIndex = CameraController.mediaModel.count - 1
+            var item = CameraController.mediaModel.get(currentIndex)
+
+            mediaExist = true
+            mediaType = item.type
+
+            if (item.type === "photo") {
+                recentPhoto.source = "file:///" + item.filePath
+                player.stop()
+            }
+            else
             {
-                root.mediaExist = true
-
-                if (root.mediaType === "photo")
-                {
-                    recentPhoto.source = "image://captured/current?" + Date.now()
-                }
-
-                console.log("captured: " + CameraController.currentMediaType)
+                player.stop()
+                player.source = "file:///" + item.filePath
+                player.play()
             }
         }
     }
@@ -83,7 +90,6 @@ Item {
 
         MediaPlayer {
             id: player
-            source: "../assets/test.mp4"
             audioOutput: AudioOutput {}
             videoOutput: videoOutput
         }
@@ -150,7 +156,22 @@ Item {
         MouseArea {
             anchors.fill: parent
             cursorShape: Qt.PointingHandCursor
-            onClicked: console.log("Previous media")
+            onClicked:
+            {
+                if (currentIndex <= 0) return
+                   currentIndex--
+
+                    var item = CameraController.mediaModel.get(currentIndex)
+                    root.mediaType = item.type
+
+                   if (item.type === "photo") {
+                       recentPhoto.source = "file:///" + item.filePath
+                       player.stop()
+                   } else {
+                       player.source = "file:///" + item.filePath
+                       player.play()
+                }
+            }
         }
     }
 
@@ -166,7 +187,22 @@ Item {
         MouseArea {
             anchors.fill: parent
             cursorShape: Qt.PointingHandCursor
-            onClicked: console.log("Next media")
+            onClicked:
+            {
+                if (currentIndex >= CameraController.mediaModel.count - 1) return
+                   currentIndex++
+
+                   var item = CameraController.mediaModel.get(currentIndex)
+                   root.mediaType = item.type
+
+                   if (item.type === "photo") {
+                       recentPhoto.source = "file:///" + item.filePath
+                       player.stop()
+                   } else {
+                       player.source = "file:///" + item.filePath
+                       player.play()
+                }
+            }
         }
     }
 

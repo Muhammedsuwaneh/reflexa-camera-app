@@ -10,6 +10,7 @@
 #include "controllers/ImageTextureController.h"
 #include "utilities/CapturedImageProvider.h"
 #include "utilities/ClipboardHelper.h"
+#include "models/MediaListModel.h"
 
 int main(int argc, char *argv[])
 {
@@ -44,6 +45,11 @@ int main(int argc, char *argv[])
 
     engine.addImageProvider("camera", cameraProvider);
     engine.addImageProvider("captured", captureProvider);
+
+    qmlRegisterUncreatableType<MediaListModel>(
+        "reflexaCameraApp", 1, 0, "MediaListModel",
+        "CameraController.mediaModel"
+        );
 
     // context
     engine.rootContext()->setContextProperty("CameraController", &camera);
