@@ -2,9 +2,9 @@
 
 ### About
 
-This project is a feature-rich camera and media application built with Qt 6, QML, C++, and OpenCV, designed for use cases such as kiosks, photobooths, interactive installations, and embedded systems.
+This project is a feature-rich camera and media application built with Qt 6, QML, C++, and OpenCV, designed for use cases such as kiosks, photobooths, interactive displays, embedded systems or any Desktop computer.
 
-The application provides a complete capture-to-playback workflow, combining real-time camera control, image processing, video recording, and media browsing in a clean, touch-friendly UI.
+The application provides a complete capture-to-playback workflow, combining real-time camera control, image processing, video recording, and media browsing in a clean, touch / click-friendly UI.
 
 
 ![Screenshot](screenshots/Main.png)
@@ -22,8 +22,12 @@ The application provides a complete capture-to-playback workflow, combining real
 - Exposure
 - Grayscale
 
+![Screenshot](screenshots/Settings.png)
+
 - Photo capture and video recording
 - Configurable timer before taking a photo or starting video recording
+
+![Screenshot](screenshots/Video.png)
 
 
 ### Image Processing & Filters (OpenCV)
@@ -39,6 +43,11 @@ Real-time and post-capture filters:
 - Face detection
 - HDR support
 
+![Screenshot](screenshots/Filters.png)
+
+![Screenshot](screenshots/Face.png)
+
+
 Filters applied using OpenCV for performance and flexibility
 
 ### Video Playback & Media Gallery
@@ -49,11 +58,14 @@ Filters applied using OpenCV for performance and flexibility
 - View captured photos and recorded videos
 - Smooth transitions and animations
 
+![Screenshot](screenshots/Gallery.png)
 
 ### QR Code Scanning
 
 - Built-in QR code scanner using the camera feed
 - Suitable for check-in, authentication, or content triggering scenarios
+
+![Screenshot](screenshots/QR.png)
 
 ### Technology Stack
 
@@ -142,6 +154,7 @@ Run from Qt Creator
 - Interactive displays
 - Embedded camera applications
 - R&D and prototyping projects
+- Ordinary Desktop computers
 
 ### Notes
 
