@@ -36,5 +36,5 @@ signals:
 
 private:
     QList<MediaItem> m_items;
-    int m_count;
+    int m_count = 0;
 };

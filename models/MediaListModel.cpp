@@ -56,6 +56,7 @@ void MediaListModel::addMedia(const QString &filePath, const QString &type)
     beginInsertRows(QModelIndex(), m_items.size(), m_items.size());
     m_items.push_back({ filePath, type, QDateTime::currentDateTime() });
     endInsertRows();
+    this->m_count = this->m_items.count();
     emit countChanged();
 }
 
@@ -64,5 +65,6 @@ void MediaListModel::clear()
     beginResetModel();
     m_items.clear();
     endResetModel();
+    this->m_count = this->m_items.count();
     emit countChanged();
 }

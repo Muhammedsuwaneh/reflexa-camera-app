@@ -210,29 +210,6 @@ Rectangle {
             }
         }
 
-
-        CameraControlButton {
-            id: playButton
-            anchors.centerIn: parent
-            isActive: false
-            iconSource: "../assets/play.png"
-
-            visible: CameraController.capturingVideo && CameraController.pauseCapture
-
-            onClicked: CameraController.continueCapture()
-        }
-
-        CameraControlButton {
-            id: pauseButton
-            anchors.centerIn: parent
-            isActive: false
-            iconSource: "../assets/pause.png"
-
-            visible: CameraController.capturingVideo && !CameraController.pauseCapture
-
-            onClicked: CameraController.pauseCapturing()
-        }
-
         CameraControlButton {
             id: stopButton
             anchors.centerIn: parent

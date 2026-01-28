@@ -559,7 +559,7 @@ void CameraService::startVideoCapture()
         QString filename =
             dir.filePath("VID_" +
                          QDateTime::currentDateTime().toString("yyyyMMdd_HHmmss") +
-                         ".avi");
+                         ".mp4");
 
         this->m_lastVideoPath = filename;
 

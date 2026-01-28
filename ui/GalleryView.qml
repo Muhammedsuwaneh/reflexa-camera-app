@@ -15,7 +15,7 @@ Item {
     property real maxZoom: 3.0
     property real rotationAngle: 0
 
-    property int currentIndex: -1
+    property int currentIndex: 0
 
     signal returnClicked()
 
@@ -29,23 +29,24 @@ Item {
                 player.stop()
             }
         }
+    }
 
-        function onRecentCapturedChanged() {
-            if (!CameraController.mediaModel || CameraController.mediaModel.count === 0)
+    Connections {
+        target: CameraController.mediaModel
+
+        function onCountChanged() {
+            if (CameraController.mediaModel.count <= 0)
                 return
 
             currentIndex = CameraController.mediaModel.count - 1
             var item = CameraController.mediaModel.get(currentIndex)
 
-            mediaExist = true
             mediaType = item.type
 
             if (item.type === "photo") {
                 recentPhoto.source = "file:///" + item.filePath
                 player.stop()
-            }
-            else
-            {
+            } else {
                 player.stop()
                 player.source = "file:///" + item.filePath
                 player.play()
@@ -91,24 +92,21 @@ Item {
         MediaPlayer {
             id: player
             audioOutput: AudioOutput {}
-            videoOutput: videoOutput
-        }
 
-        VideoOutput {
-            id: videoOutput
-            anchors.fill: parent
-            anchors
-            {
-                leftMargin: 60
-                rightMargin: 60
-                topMargin: 20
-                bottomMargin: 20
-            }
+            videoOutput: VideoOutput {
+                anchors.fill: parent
+                anchors {
+                    leftMargin: 60
+                    rightMargin: 60
+                    topMargin: 20
+                    bottomMargin: 20
+                }
 
-            opacity: root.mediaType === "photo" ? 0 : 1
+                opacity: root.mediaType === "photo" ? 0 : 1
 
-            Behavior on opacity {
-                NumberAnimation { duration: 200; easing.type: Easing.OutCubic }
+                Behavior on opacity {
+                    NumberAnimation { duration: 200; easing.type: Easing.OutCubic }
+                }
             }
         }
     }
@@ -314,5 +312,26 @@ Item {
 
     Behavior on rotationAngle {
         NumberAnimation { duration: 200; easing.type: Easing.OutCubic }
+    }
+
+    Component.onCompleted: {
+        if (CameraController.mediaModel &&
+            CameraController.mediaModel.count > 0) {
+
+            currentIndex = CameraController.mediaModel.count - 1
+            var item = CameraController.mediaModel.get(currentIndex)
+
+            mediaExist = true
+            mediaType = item.type
+
+            if (item.type === "photo") {
+                recentPhoto.source = "file:///" + item.filePath
+                player.stop()
+            } else {
+                player.stop()
+                player.source = "file:///" + item.filePath
+                player.play()
+            }
+        }
     }
 }
