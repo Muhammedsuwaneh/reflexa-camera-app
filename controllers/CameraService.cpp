@@ -144,7 +144,6 @@ void CameraService::processFrame()
             applyLiveFilters();
         }
 
-
         if (this->m_capturingVideo && this->writer.isOpened())
         {
             writer.write(this->m_processedFrame);
@@ -270,7 +269,7 @@ void CameraService::adjustGrayScale()
         grayRGB, g,
         0.0,
         blended
-        );
+    );
 
     setProcessedFrame(blended);
 }
@@ -563,7 +562,15 @@ void CameraService::startVideoCapture()
 
         this->m_lastVideoPath = filename;
 
-        writer.open(filename.toLocal8Bit().constData(), cv::VideoWriter::fourcc('M', 'J', 'P', 'G'), fps, cv::Size(width, height));
+        //writer.open(filename.toLocal8Bit().constData(), cv::VideoWriter::fourcc('m', 'p', '4', 'v'), fps, cv::Size(width, height));
+
+        writer.open(
+            filename.toStdString(),
+            cv::VideoWriter::fourcc('m','p','4','v'),
+            fps,
+            cv::Size(width, height),
+            true
+            );
 
         if(!writer.isOpened())
         {
