@@ -95,9 +95,13 @@ void CameraService::processFrame()
 
     this->m_processedFrame = this->m_originalFrame.clone();
 
-    if(this->detectingFace)
+    if(this->detectingFace && this->scanningQRCode == false)
     {
         this->faceDetector.detect(this->m_processedFrame);
+    }
+    if(this->scanningQRCode && this->detectingFace = false)
+    {
+        // scan QR Code
     }
 
     applyLiveAdjustments();
@@ -604,9 +608,18 @@ void CameraService::setMode(const Mode &newMode)
 
     switch (newMode)
     {
-        case Photo: applyPhotoQuality(this->m_currentQualityIndex); break;
-        case Video: applyVideoQuality(this->m_currentQualityIndex); break;
-        case QRCode: break;
+        case Photo:
+            applyPhotoQuality(this->m_currentQualityIndex);
+            this->scanningQRCode = false;
+            break;
+        case Video:
+            applyVideoQuality(this->m_currentQualityIndex);
+            this->scanningQRCode = false;
+            break;
+        case QRCode:
+            this->detectingFace = false;
+            this->scanningQRCode = true;
+            break;
     }
 
     emit modeChanged();

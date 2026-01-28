@@ -7,6 +7,7 @@
 #include <QThread>
 #include <QTimer>
 #include "utilities/FaceDetector.h"
+#include "utilities/QRCodeDetector.h"
 
 class CameraService : public QObject
 {
@@ -164,7 +165,9 @@ private:
     cv::VideoCapture cap;
 
     FaceDetector faceDetector;
+    QRCodeDetector qRCodeDetector;
     std::atomic<bool> detectingFace {false};
+    std::atomic<bool> scanningQRCode {false};
 
     QTimer timer;
 

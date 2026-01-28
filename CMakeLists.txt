@@ -87,6 +87,7 @@ qt_add_qml_module(appreflexaCameraApp
         QML_FILES ui/GridLines.qml
         QML_FILES
         QML_FILES ui/GalleryView.qml
+        SOURCES utilities/QRCodeDetector.h utilities/QRCodeDetector.cpp
 
 )
 

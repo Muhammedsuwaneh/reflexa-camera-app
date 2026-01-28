@@ -116,6 +116,7 @@ void CameraControls::activateQR()
         this->m_cameraButtonIsActive = false;
         this->m_videoButtonIsActive = false;
         this->m_qrButtonIsActive = true;
+        this->m_faceDetectorIsActive = false;
 
         emit cameraButtonIsActiveChanged();
         emit videoButtonIsActiveChanged();
