@@ -42,6 +42,7 @@ Item {
             var item = CameraController.mediaModel.get(currentIndex)
 
             mediaType = item.type
+            mediaExist = true
 
             if (item.type === "photo") {
                 recentPhoto.source = "file:///" + item.filePath
