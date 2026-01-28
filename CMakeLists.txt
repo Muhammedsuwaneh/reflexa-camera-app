@@ -83,8 +83,8 @@ qt_add_qml_module(appreflexaCameraApp
         SOURCES utilities/CapturedImageProvider.h utilities/CapturedImageProvider.cpp
         QML_FILES ui/RecordTimer.qml
         SOURCES utilities/FaceDetector.h utilities/FaceDetector.cpp
-        models/res10_300x300_ssd_iter_140000.caffemodel
-        models/deploy.prototxt
+        data/res10_300x300_ssd_iter_140000.caffemodel
+        data/deploy.prototxt
         QML_FILES ui/GridLines.qml
         QML_FILES
         QML_FILES ui/GalleryView.qml
