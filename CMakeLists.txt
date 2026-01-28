@@ -13,6 +13,7 @@ find_package(Qt6 REQUIRED COMPONENTS Widgets)
 find_package(Qt6 REQUIRED COMPONENTS Core)
 find_package(Qt6 REQUIRED COMPONENTS Core)
 find_package(Qt6 REQUIRED COMPONENTS Core)
+find_package(Qt6 REQUIRED COMPONENTS Core)
 
 find_package(OpenCV REQUIRED)
 include_directories(${OpenCV_INCLUDE_DIRS})
@@ -87,7 +88,8 @@ qt_add_qml_module(appreflexaCameraApp
         QML_FILES ui/GridLines.qml
         QML_FILES
         QML_FILES ui/GalleryView.qml
-        SOURCES utilities/QRCodeDetector.h utilities/QRCodeDetector.cpp
+        SOURCES utilities/QRDetector.h utilities/QRDetector.cpp
+        SOURCES utilities/ClipboardHelper.h utilities/ClipboardHelper.cpp
 
 )
 
@@ -111,6 +113,7 @@ target_link_libraries(appreflexaCameraApp PRIVATE Qt6::Multimedia)
 target_link_libraries(appreflexaCameraApp PRIVATE Qt6::Core)
 target_link_libraries(appreflexaCameraApp PRIVATE Qt6::Widgets)
 target_link_libraries(appreflexaCameraApp PRIVATE Qt6::Qml)
+target_link_libraries(appreflexaCameraApp PRIVATE Qt6::Core)
 target_link_libraries(appreflexaCameraApp PRIVATE Qt6::Core)
 target_link_libraries(appreflexaCameraApp PRIVATE Qt6::Core)
 target_link_libraries(appreflexaCameraApp PRIVATE Qt6::Core)

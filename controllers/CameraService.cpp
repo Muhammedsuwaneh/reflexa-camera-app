@@ -87,36 +87,54 @@ void CameraService::stopCamera()
 
 void CameraService::processFrame()
 {
-    if (!running || !cap.isOpened())
-        return;
-
-    if (!cap.read(this->m_originalFrame) || m_originalFrame.empty())
-        return;
-
-    this->m_processedFrame = this->m_originalFrame.clone();
-
-    if(this->detectingFace && this->scanningQRCode == false)
+    try
     {
-        this->faceDetector.detect(this->m_processedFrame);
+        if (!running || !cap.isOpened())
+            return;
+
+        if (!cap.read(this->m_originalFrame) || m_originalFrame.empty())
+            return;
+
+        this->m_processedFrame = this->m_originalFrame.clone();
+
+        if(this->detectingFace && this->scanningQRCode == false)
+        {
+            this->faceDetector.detect(this->m_processedFrame);
+        }
+
+        if(this->scanningQRCode && this->detectingFace == false)
+        {
+            QString decodedText;
+            if (qRCodeDetector.detect(this->m_processedFrame, decodedText))
+            {
+                qDebug() << "QR detected:" << decodedText;
+
+                this->m_qrDetected = decodedText;
+                emit qrDetectedChanged();
+            }
+        }
+
+        if(!this->scanningQRCode)
+        {
+            applyLiveAdjustments();
+            applyLiveFilters();
+        }
+
+
+        if (this->m_capturingVideo && this->writer.isOpened())
+        {
+            writer.write(this->m_processedFrame);
+        }
+
+        this->m_frame = matToQImage(this->m_processedFrame);
+
+        emit originalFrameChanged();
+        emit frameChanged();
     }
-    if(this->scanningQRCode && this->detectingFace = false)
+    catch(const std::exception &e)
     {
-        // scan QR Code
+        qDebug() << e.what();
     }
-
-    applyLiveAdjustments();
-    applyLiveFilters();
-
-
-    if (this->m_capturingVideo && this->writer.isOpened())
-    {
-        writer.write(this->m_processedFrame); // capture frame / record video
-    }
-
-    this->m_frame = matToQImage(this->m_processedFrame);
-
-    emit originalFrameChanged();
-    emit frameChanged();
 }
 
 void CameraService::applyLiveAdjustments()
@@ -147,7 +165,6 @@ void CameraService::applyLiveFilters()
         this->m_grayScale = 0;
     }
 }
-
 
 void CameraService::adjustBrightness()
 {
@@ -381,27 +398,35 @@ void CameraService::getCaptureData()
 
 void CameraService::applyPhotoQuality(int index)
 {
-    stopCamera();
+    try
+    {
+        stopCamera();
 
-    const auto devices = QMediaDevices::videoInputs();
-    if (devices.isEmpty()) return;
+        const auto devices = QMediaDevices::videoInputs();
+        if (devices.isEmpty()) return;
 
-    const QCameraDevice &device = devices[m_currentCameraIndex];
-    QList<QSize> sizes;
+        const QCameraDevice &device = devices[m_currentCameraIndex];
+        QList<QSize> sizes;
 
-    for (const QCameraFormat &f : device.videoFormats())
-        if (!sizes.contains(f.resolution()))
-            sizes << f.resolution();
+        for (const QCameraFormat &f : device.videoFormats())
+            if (!sizes.contains(f.resolution()))
+                sizes << f.resolution();
 
-    if (index < 0 || index >= sizes.size()) return;
+        if (index < 0 || index >= sizes.size()) return;
 
-    const QSize size = sizes[index];
+        const QSize size = sizes[index];
 
-    cap.set(cv::CAP_PROP_FRAME_WIDTH, size.width());
-    cap.set(cv::CAP_PROP_FRAME_HEIGHT, size.height());
+        cap.set(cv::CAP_PROP_FRAME_WIDTH, size.width());
+        cap.set(cv::CAP_PROP_FRAME_HEIGHT, size.height());
 
-    setCurrentQualityIndex(index);
-    startCamera();
+        setCurrentQualityIndex(index);
+        startCamera();
+
+    }
+    catch (const std::exception &e)
+    {
+        QMessageBox::information(nullptr, tr("Camera Error"), QString::fromStdString(e.what()), QMessageBox::Ok);
+    }
 }
 
 
@@ -448,38 +473,45 @@ void CameraService::applyVideoQuality(int formatIndex)
 
 void CameraService::takeShot()
 {
-    if(this->m_processedFrame.empty()) return;
-
-    QString picturesDir = QStandardPaths::writableLocation(QStandardPaths::PicturesLocation);
-
-    QDir dir(picturesDir + "/ReflexaCamCaptures");
-    if (!dir.exists())
-        dir.mkpath(".");
-
-    QString fileName =
-        dir.filePath("IMG_" +
-                     QDateTime::currentDateTime().toString("yyyyMMdd_HHmmss") +
-                     ".jpg");
-
-    std::string path = fileName.toStdString();
-
-    std::vector<int> params = {
-        cv::IMWRITE_JPEG_QUALITY, 95
-    };
-
-    cv::Mat frameToSave = this->m_processedFrame.clone();
-
-    bool success = cv::imwrite(path, frameToSave, params);
-
-    if (success)
+    try
     {
-        setRecentCaptured(matToQImage(frameToSave));
-        this->m_currentMediaType = "photo";
-        emit currentMediaTypeChanged();
+        if(this->m_processedFrame.empty()) return;
+
+        QString picturesDir = QStandardPaths::writableLocation(QStandardPaths::PicturesLocation);
+
+        QDir dir(picturesDir + "/ReflexaCamCaptures");
+        if (!dir.exists())
+            dir.mkpath(".");
+
+        QString fileName =
+            dir.filePath("IMG_" +
+                         QDateTime::currentDateTime().toString("yyyyMMdd_HHmmss") +
+                         ".jpg");
+
+        std::string path = fileName.toStdString();
+
+        std::vector<int> params = {
+            cv::IMWRITE_JPEG_QUALITY, 95
+        };
+
+        cv::Mat frameToSave = this->m_processedFrame.clone();
+
+        bool success = cv::imwrite(path, frameToSave, params);
+
+        if (success)
+        {
+            setRecentCaptured(matToQImage(frameToSave));
+            this->m_currentMediaType = "photo";
+            emit currentMediaTypeChanged();
+        }
+        else
+        {
+            qDebug() << "Failed to save image";
+        }
     }
-    else
+    catch (const std::exception &e)
     {
-        qDebug() << "Failed to save image";
+        QMessageBox::information(nullptr, tr("Camera Error"), QString::fromStdString(e.what()), QMessageBox::Ok);
     }
 }
 
@@ -524,18 +556,25 @@ void CameraService::startVideoCapture()
 
 void CameraService::stopVideoCapture()
 {
-    if (!m_capturingVideo)
-        return;
+    try
+    {
+        if (!m_capturingVideo)
+            return;
 
-    m_capturingVideo = false;
+        m_capturingVideo = false;
 
-    if (writer.isOpened())
-        writer.release();
+        if (writer.isOpened())
+            writer.release();
 
-    this->m_currentMediaType = "video";
-    setRecentCaptured(matToQImage(m_processedFrame.clone()));
-    emit capturingVideoChanged();
-    emit currentMediaTypeChanged();
+        this->m_currentMediaType = "video";
+        setRecentCaptured(matToQImage(m_processedFrame.clone()));
+        emit capturingVideoChanged();
+        emit currentMediaTypeChanged();
+    }
+    catch (const std::exception &e)
+    {
+        QMessageBox::information(nullptr, tr("Camera Error"), QString::fromStdString(e.what()), QMessageBox::Ok);
+    }
 }
 
 void CameraService::scanQR()
@@ -774,4 +813,9 @@ CameraService::~CameraService()
 QString CameraService::currentMediaType() const
 {
     return m_currentMediaType;
+}
+
+QString CameraService::qrDetected() const
+{
+    return m_qrDetected;
 }

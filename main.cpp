@@ -9,6 +9,7 @@
 #include "controllers/ImageFiltersController.h"
 #include "controllers/ImageTextureController.h"
 #include "utilities/CapturedImageProvider.h"
+#include "utilities/ClipboardHelper.h"
 
 int main(int argc, char *argv[])
 {
@@ -36,9 +37,11 @@ int main(int argc, char *argv[])
     ImageTextureController* textureController = new ImageTextureController(&camera);
 
 
-    // providers
+    // providers / utils
     CameraImageProvider* cameraProvider = new CameraImageProvider(&camera);
     CapturedImageProvider* captureProvider = new CapturedImageProvider(&camera);
+    ClipboardHelper clipboardHelper;
+
     engine.addImageProvider("camera", cameraProvider);
     engine.addImageProvider("captured", captureProvider);
 
@@ -48,6 +51,7 @@ int main(int argc, char *argv[])
     engine.rootContext()->setContextProperty("WindowController", &windowController);
     engine.rootContext()->setContextProperty("ImageFiltersController", filterController);
     engine.rootContext()->setContextProperty("ImageTextureController", textureController);
+    engine.rootContext()->setContextProperty("ClipboardHelper", &clipboardHelper);
 
 
     QObject::connect(

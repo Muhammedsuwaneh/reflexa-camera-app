@@ -43,7 +43,7 @@ Window {
                 id: cameraView
                 anchors.fill: parent
                 anchors.margins: 10
-                fillMode: Image.PreserveAspectCrop
+                fillMode: Image.PreserveAspectFit
                 cache: false
                 smooth: true
                 source: "image://camera/live"
@@ -351,6 +351,68 @@ Window {
             onCapturingVideoChanged:
             {
                 recordingSpinner.visible = CameraController.capturingVideo
+            }
+        }
+    }
+
+    Rectangle {
+        id: qrCodeContainer
+        color: "#F1F5F9"
+        width: 350
+        height: 40
+        radius: 10
+        opacity: 0
+        z: 100
+        visible: false
+
+        anchors.bottom: parent.bottom
+        anchors.bottomMargin: 120
+        anchors.horizontalCenter: parent.horizontalCenter
+
+        Text {
+            id: decodedText
+            text: ""
+            color: "#333"
+            anchors.centerIn: parent
+            elide: Text.ElideMiddle
+        }
+
+        Timer {
+            id: hideQrTimer
+            interval: 7000
+            repeat: false
+            onTriggered: qrCodeContainer.opacity = 0
+        }
+
+        Behavior on opacity {
+            NumberAnimation {
+                duration: 200
+                easing.type: Easing.OutCubic
+            }
+        }
+
+        onOpacityChanged: {
+            if (opacity === 0)
+                visible = false
+        }
+
+        Connections {
+            target: CameraController
+            onQrDetectedChanged: {
+                decodedText.text = CameraController.qrDetected
+                qrCodeContainer.visible = true
+                qrCodeContainer.opacity = 1
+                hideQrTimer.restart()
+            }
+        }
+
+        MouseArea {
+            anchors.fill: parent
+            hoverEnabled: true
+            cursorShape: Qt.PointingHandCursor
+
+            onClicked: {
+                ClipboardHelper.copyText(decodedText.text)
             }
         }
     }

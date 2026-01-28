@@ -7,7 +7,7 @@
 #include <QThread>
 #include <QTimer>
 #include "utilities/FaceDetector.h"
-#include "utilities/QRCodeDetector.h"
+#include "utilities/QRDetector.h"
 
 class CameraService : public QObject
 {
@@ -39,6 +39,7 @@ class CameraService : public QObject
     // FILTERS
     Q_PROPERTY(QString activeFilter READ activeFilter WRITE setActiveFilter NOTIFY activeFilterChanged)
     Q_PROPERTY(QString currentMediaType READ currentMediaType NOTIFY currentMediaTypeChanged)
+    Q_PROPERTY(QString qrDetected READ qrDetected NOTIFY qrDetectedChanged)
 
     Q_PROPERTY(bool capturingVideo READ capturingVideo NOTIFY capturingVideoChanged)
 
@@ -124,6 +125,8 @@ public:
 
     QString currentMediaType() const;
 
+    QString qrDetected() const;
+
 signals:
     void frameChanged();
     void frameCleared();
@@ -160,12 +163,14 @@ signals:
 
     void currentMediaTypeChanged();
 
+    void qrDetectedChanged();
+
 private:
     QImage m_frame;
     cv::VideoCapture cap;
 
     FaceDetector faceDetector;
-    QRCodeDetector qRCodeDetector;
+    QRDetector qRCodeDetector;
     std::atomic<bool> detectingFace {false};
     std::atomic<bool> scanningQRCode {false};
 
@@ -216,6 +221,7 @@ private:
 
     cv::VideoWriter writer;
     QString m_currentMediaType = "photo";
+    QString m_qrDetected;
 };
 
 #endif // CAMERASERVICE_H
