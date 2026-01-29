@@ -35,12 +35,18 @@ Item {
         target: CameraController.mediaModel
 
         function onCountChanged() {
-            if (CameraController.mediaModel.count <= 0)
+            if (CameraController.mediaModel.count <= 0) {
+                mediaExist = false
+                player.stop()
                 return
+            }
 
-            currentIndex = CameraController.mediaModel.count - 1
+            currentIndex = Math.min(
+                currentIndex,
+                CameraController.mediaModel.count - 1
+            )
+
             var item = CameraController.mediaModel.get(currentIndex)
-
             mediaType = item.type
             mediaExist = true
 
@@ -48,8 +54,8 @@ Item {
                 recentPhoto.source = "file:///" + item.filePath
                 player.stop()
             } else {
-                player.stop()
                 player.source = "file:///" + item.filePath
+                player.play()
             }
         }
     }
@@ -222,7 +228,10 @@ Item {
                 MouseArea {
                     anchors.fill: parent
                     cursorShape: Qt.PointingHandCursor
-                    onClicked: CameraController.deleteFile(currentIndex)
+                    onClicked:
+                    {
+                        CameraController.deleteFile(currentIndex)
+                    }
                 }
             }
 

@@ -609,47 +609,57 @@ void CameraService::deleteFile(int index)
     if (!m_mediaModel)
         return;
 
-    if (index < 0 || index >= m_mediaModel->rowCount())
-    {
-        qDebug() << "Invalid media index";
+    int countBefore = m_mediaModel->rowCount();
+
+    if (index < 0 || index >= countBefore)
         return;
-    }
 
     QModelIndex modelIndex = m_mediaModel->index(index, 0);
-    QString filePath = m_mediaModel
-                           ->data(modelIndex, MediaListModel::FilePathRole)
-                           .toString();
-
-    if (filePath.isEmpty())
-    {
-        qDebug() << "Empty file path";
-        return;
-    }
+    QString filePath =
+        m_mediaModel->data(modelIndex, MediaListModel::FilePathRole).toString();
 
     QFile file(filePath);
-    if (!file.exists())
-    {
-        qDebug() << "File does not exist:" << filePath;
-    }
-    else if (!file.remove())
-    {
-        qDebug() << "Failed to delete file:" << filePath;
+    if (file.exists() && !file.remove())
         return;
-    }
 
     m_mediaModel->removeAt(index);
 
-    qDebug() << "Deleted media:" << filePath;
+    int countAfter = m_mediaModel->rowCount();
 
-    // 🔄 Update UI state
-    if (m_mediaModel->rowCount() == 0)
+    if (countAfter == 0)
     {
         m_currentMediaType.clear();
         m_recentCaptured = QImage();
-        emit recentCapturedChanged();
+
         emit currentMediaTypeChanged();
+        emit recentCapturedChanged();
+        return;
     }
+
+    int nextIndex = index;
+    if (nextIndex >= countAfter)
+        nextIndex = countAfter - 1;
+
+    QModelIndex nextModelIndex = m_mediaModel->index(nextIndex, 0);
+
+    QString nextType =
+        m_mediaModel->data(nextModelIndex, MediaListModel::TypeRole).toString();
+
+    QString nextPath =
+        m_mediaModel->data(nextModelIndex, MediaListModel::FilePathRole).toString();
+
+    m_currentMediaType = nextType;
+    emit currentMediaTypeChanged();
+
+    if (nextType == "photo")
+    {
+        m_recentCaptured = QImage(nextPath);
+        emit recentCapturedChanged();
+    }
+
+    return;
 }
+
 
 void CameraService::stopVideoCapture()
 {
