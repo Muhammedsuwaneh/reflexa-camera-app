@@ -80,6 +80,8 @@ public:
 
     void applyAdjustmentsAndFilters();
 
+    Q_INVOKABLE void deleteFile(int index);
+
     void init();
 
     int currentCameraIndex() const;

@@ -26,6 +26,16 @@ int MediaListModel::rowCount(const QModelIndex &) const
     return m_items.count();
 }
 
+void MediaListModel::removeAt(int index)
+{
+    if (index < 0 || index >= m_items.size())
+        return;
+
+    beginRemoveRows(QModelIndex(), index, index);
+    m_items.removeAt(index);
+    endRemoveRows();
+}
+
 QVariant MediaListModel::data(const QModelIndex &index, int role) const
 {
     if (!index.isValid() || index.row() >= m_items.size())

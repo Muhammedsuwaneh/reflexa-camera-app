@@ -222,7 +222,7 @@ Item {
                 MouseArea {
                     anchors.fill: parent
                     cursorShape: Qt.PointingHandCursor
-                    onClicked: console.log("Delete media")
+                    onClicked: CameraController.deleteFile(currentIndex)
                 }
             }
 

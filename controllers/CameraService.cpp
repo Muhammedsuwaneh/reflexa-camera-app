@@ -604,6 +604,53 @@ void CameraService::startVideoCapture()
     }
 }
 
+void CameraService::deleteFile(int index)
+{
+    if (!m_mediaModel)
+        return;
+
+    if (index < 0 || index >= m_mediaModel->rowCount())
+    {
+        qDebug() << "Invalid media index";
+        return;
+    }
+
+    QModelIndex modelIndex = m_mediaModel->index(index, 0);
+    QString filePath = m_mediaModel
+                           ->data(modelIndex, MediaListModel::FilePathRole)
+                           .toString();
+
+    if (filePath.isEmpty())
+    {
+        qDebug() << "Empty file path";
+        return;
+    }
+
+    QFile file(filePath);
+    if (!file.exists())
+    {
+        qDebug() << "File does not exist:" << filePath;
+    }
+    else if (!file.remove())
+    {
+        qDebug() << "Failed to delete file:" << filePath;
+        return;
+    }
+
+    m_mediaModel->removeAt(index);
+
+    qDebug() << "Deleted media:" << filePath;
+
+    // 🔄 Update UI state
+    if (m_mediaModel->rowCount() == 0)
+    {
+        m_currentMediaType.clear();
+        m_recentCaptured = QImage();
+        emit recentCapturedChanged();
+        emit currentMediaTypeChanged();
+    }
+}
+
 void CameraService::stopVideoCapture()
 {
     try

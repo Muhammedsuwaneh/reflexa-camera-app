@@ -30,6 +30,7 @@ public:
     Q_INVOKABLE void addMedia(const QString &filePath, const QString &type);
     Q_INVOKABLE void clear();
     Q_INVOKABLE QVariantMap get(int index) const;
+    Q_INVOKABLE void removeAt(int index);
 
 signals:
     void countChanged();
