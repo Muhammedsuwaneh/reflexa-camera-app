@@ -22,6 +22,10 @@ class CameraService : public QObject
     Q_PROPERTY(QStringList cameraNames READ cameraNames NOTIFY camerasChanged)
     Q_PROPERTY(int currentCameraIndex READ currentCameraIndex WRITE setCurrentCameraIndex NOTIFY cameraChanged)
 
+    // AUDIO DEVICES
+    Q_PROPERTY(QStringList audioDevices READ audioDevices NOTIFY audioDevicesChanged)
+    Q_PROPERTY(int currentAudioDeviceIndex READ currentAudioDeviceIndex WRITE setCurrentAudioDeviceIndex NOTIFY currentAudioDeviceIndexChanged)
+
     // PHOTO QUALITY
     Q_PROPERTY(QStringList camQualities READ camQualities NOTIFY camQualitiesChanged)
     Q_PROPERTY(int currentQualityIndex READ currentQualityIndex WRITE setCurrentQualityIndex NOTIFY currentQualityIndexChanged)
@@ -69,9 +73,10 @@ public:
     Q_INVOKABLE void applyPhotoQuality(int index);
     Q_INVOKABLE void applyVideoQuality(int index);
 
+    Q_INVOKABLE void switchAudioInput(int index);
+
     Q_INVOKABLE void takeShot();
     Q_INVOKABLE void startVideoCapture();
-    Q_INVOKABLE void scanQR();
 
     void applyAdjustmentsAndFilters();
 
@@ -132,6 +137,11 @@ public:
 
     MediaListModel *mediaModel() const;
 
+    QStringList audioDevices() const;
+
+    int currentAudioDeviceIndex() const;
+    void setCurrentAudioDeviceIndex(int newCurrentAudioDeviceIndex);
+
 signals:
     void frameChanged();
     void frameCleared();
@@ -169,6 +179,10 @@ signals:
     void currentMediaTypeChanged();
 
     void qrDetectedChanged();
+
+    void audioDevicesChanged();
+
+    void currentAudioDeviceIndexChanged();
 
 private:
     QImage m_frame;
@@ -232,6 +246,8 @@ private:
     QString m_currentMediaType = "photo";
     QString m_qrDetected;
     MediaListModel *m_mediaModel;
+    QStringList m_audioDevices;
+    int m_currentAudioDeviceIndex = 0;
 };
 
 #endif // CAMERASERVICE_H

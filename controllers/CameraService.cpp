@@ -2,6 +2,7 @@
 #include <QDebug>
 #include <QMediaDevices>
 #include <QCameraDevice>
+#include <QAudioDevice>
 #include <QMessageBox>
 #include <opencv2/opencv.hpp>
 #include <algorithm>
@@ -11,6 +12,7 @@
 #include <QDir>
 #include <QDebug>
 #include <QString>
+#include <QUrl>
 
 CameraService::CameraService(QObject *parent)
     : QObject{parent}
@@ -369,6 +371,7 @@ void CameraService::getCaptureData()
         m_camQualities.clear();
         m_videoQualities.clear();
         m_cameraNames.clear();
+        m_audioDevices.clear();
 
         const QList<QCameraDevice> cameraDevices = QMediaDevices::videoInputs();
 
@@ -411,6 +414,15 @@ void CameraService::getCaptureData()
                                      tr("No camera devices connected.\nPlease connect a camera device."),
                                      QMessageBox::Ok);
         }
+
+
+        // audio devices
+        const QList<QAudioDevice> audioDevices = QMediaDevices::audioInputs();
+
+        for(const QAudioDevice& device: audioDevices)
+            m_audioDevices.push_back(device.description());
+
+        emit audioDevicesChanged();
     }
     catch (const std::exception &e)
     {
@@ -463,7 +475,8 @@ void CameraService::applyVideoQuality(int formatIndex)
         if (devices.isEmpty()) return;
         if (m_currentCameraIndex < 0 || m_currentCameraIndex >= devices.size()) return;
 
-        const QCameraDevice &device = devices[m_currentCameraIndex];
+        const QCameraDevice device = devices[m_currentCameraIndex];
+
         const auto formats = device.videoFormats();
         if (formatIndex < 0 || formatIndex >= formats.size()) return;
 
@@ -492,6 +505,12 @@ void CameraService::applyVideoQuality(int formatIndex)
     {
         QMessageBox::information(nullptr, tr("Camera Error"), QString::fromStdString(e.what()), QMessageBox::Ok);
     }
+}
+
+void CameraService::switchAudioInput(int index)
+{
+    this->m_currentAudioDeviceIndex = index;
+    emit currentAudioDeviceIndexChanged();
 }
 
 void CameraService::takeShot()
@@ -562,8 +581,6 @@ void CameraService::startVideoCapture()
 
         this->m_lastVideoPath = filename;
 
-        //writer.open(filename.toLocal8Bit().constData(), cv::VideoWriter::fourcc('m', 'p', '4', 'v'), fps, cv::Size(width, height));
-
         writer.open(
             filename.toStdString(),
             cv::VideoWriter::fourcc('m','p','4','v'),
@@ -613,10 +630,6 @@ void CameraService::stopVideoCapture()
     }
 }
 
-void CameraService::scanQR()
-{
-    qDebug() << "Scanning QR ...";
-}
 
 QStringList CameraService::cameraNames() const { return this->m_cameraNames; }
 
@@ -860,3 +873,22 @@ MediaListModel *CameraService::mediaModel() const
 {
     return m_mediaModel;
 }
+
+QStringList CameraService::audioDevices() const
+{
+    return m_audioDevices;
+}
+
+int CameraService::currentAudioDeviceIndex() const
+{
+    return m_currentAudioDeviceIndex;
+}
+
+void CameraService::setCurrentAudioDeviceIndex(int newCurrentAudioDeviceIndex)
+{
+    if (m_currentAudioDeviceIndex == newCurrentAudioDeviceIndex)
+        return;
+    m_currentAudioDeviceIndex = newCurrentAudioDeviceIndex;
+    emit currentAudioDeviceIndexChanged();
+}
+

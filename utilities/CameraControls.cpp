@@ -153,8 +153,6 @@ void CameraControls::onQRPressed()
         activateQR();
         return;
     }
-
-    this->m_camera->scanQR();
 }
 
 bool CameraControls::showSettings() const

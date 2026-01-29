@@ -16,7 +16,7 @@ Rectangle {
         GridLayout
         {
             anchors.topMargin: 15
-            rows: 9
+            rows: 10
             rowSpacing: 20
 
             // CAMS
@@ -44,9 +44,33 @@ Rectangle {
                 }
             }
 
-            // CAM QUALITY
+            // AUDIO INPUTS
             ColumnLayout {
                 Layout.row: 1
+                Layout.fillWidth: true
+                spacing: 6
+                Layout.leftMargin: 20
+
+                Text {
+                    text: "Select Audio Input:"
+                    font.pixelSize: 15
+                    color: "#ffffff"
+                }
+
+                CustomComboBox {
+                    Layout.fillWidth: true
+                    model: CameraController.audioDevices
+                    currentIndex: CameraController.currentAudioDeviceIndex
+
+                    onActivated: (index) => {
+                        CameraController.switchAudioInput(index)
+                    }
+                }
+            }
+
+            // CAM QUALITY
+            ColumnLayout {
+                Layout.row: 2
                 Layout.fillWidth: true
                 spacing: 6
                 Layout.leftMargin: 20
@@ -70,7 +94,7 @@ Rectangle {
 
             // VIDEO QUALITY
             ColumnLayout {
-                Layout.row: 2
+                Layout.row: 3
                 Layout.fillWidth: true
                 spacing: 6
                 Layout.leftMargin: 20
@@ -93,7 +117,7 @@ Rectangle {
             }
 
             ColumnLayout {
-                Layout.row: 3
+                Layout.row: 4
                 Layout.fillWidth: true
                 spacing: 6
                 Layout.leftMargin: 20
@@ -118,7 +142,7 @@ Rectangle {
 
             ColumnLayout {
                 Layout.topMargin: 15
-                Layout.row: 4
+                Layout.row: 5
                 Layout.fillWidth: true
                 spacing: 3
                 Layout.leftMargin: 20
@@ -143,7 +167,7 @@ Rectangle {
 
             ColumnLayout {
                 Layout.topMargin: 15
-                Layout.row: 5
+                Layout.row: 6
                 Layout.fillWidth: true
                 spacing: 3
                 Layout.leftMargin: 20
@@ -169,7 +193,7 @@ Rectangle {
 
             ColumnLayout {
                 Layout.topMargin: 15
-                Layout.row: 6
+                Layout.row: 7
                 Layout.fillWidth: true
                 spacing: 3
                 Layout.leftMargin: 20
@@ -195,7 +219,7 @@ Rectangle {
 
             ColumnLayout {
                 Layout.topMargin: 15
-                Layout.row: 7
+                Layout.row: 8
                 Layout.fillWidth: true
                 spacing: 3
                 Layout.leftMargin: 20
@@ -221,7 +245,7 @@ Rectangle {
 
             ColumnLayout {
                 Layout.topMargin: 15
-                Layout.row: 8
+                Layout.row: 9
                 Layout.fillWidth: true
                 spacing: 3
                 Layout.leftMargin: 20
