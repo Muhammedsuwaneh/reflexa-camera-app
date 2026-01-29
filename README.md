@@ -60,6 +60,8 @@ Filters applied using OpenCV for performance and flexibility
 
 ![Screenshot](screenshots/Gallery.png)
 
+![Screenshot](screenshots/Gallery2.png)
+
 ### QR Code Scanning
 
 - Built-in QR code scanner using the camera feed

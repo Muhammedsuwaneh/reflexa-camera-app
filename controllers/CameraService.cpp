@@ -123,7 +123,7 @@ void CameraService::processFrame()
 
         this->m_processedFrame = this->m_originalFrame.clone();
 
-        if(this->detectingFace && this->scanningQRCode == false)
+        if(this->detectingFace && this->scanningQRCode == false && !this->m_capturingVideo)
         {
             this->faceDetector.detect(this->m_processedFrame);
         }
